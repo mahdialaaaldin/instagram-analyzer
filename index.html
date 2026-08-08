@@ -1,843 +1,2291 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
-<title>Instagram Followers Analyzer</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<style>
-:root{
-  --bg:#fafafa; --bg-elev:#ffffff; --border:#e5e5e5; --text:#111111; --text-dim:#6b6b6b;
-  --accent:#6d28d9; --accent2:#ec4899; --accent-soft:#f3e8ff; --danger:#dc2626; --success:#16a34a;
-  --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
-[data-theme="dark"]{
-  --bg:#0b0b0d; --bg-elev:#141417; --border:#242429; --text:#f2f2f3; --text-dim:#9a9aa2;
-  --accent:#a78bfa; --accent2:#f472b6; --accent-soft:#241a3a; --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 30px rgba(0,0,0,.35);
-}
-.icon{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.icon-lg{width:22px;height:22px}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{
-  background:var(--bg); color:var(--text); min-height:100vh;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
-  transition:background .25s ease,color .25s ease;
-}
-::selection{background:var(--accent-soft)}
-a{color:inherit}
-button{font-family:inherit}
-.hidden{display:none !important}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-/* Top bar */
-.topbar{
-  position:sticky; top:0; z-index:40; display:flex; align-items:center; justify-content:space-between;
-  padding:14px 24px; background:color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--border);
-}
-.brand{display:flex; align-items:center; gap:10px; font-weight:700; font-size:16px; letter-spacing:-.02em}
-.brand-badge{
-  width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));
-  display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;
-}
-.privacy-pill{
-  display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-dim);
-  border:1px solid var(--border);padding:6px 12px;border-radius:999px;background:var(--bg-elev);
-}
-.privacy-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--success)}
-.top-actions{display:flex;align-items:center;gap:8px}
-.icon-btn{
-  width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--bg-elev);
-  color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;
-  transition:.15s;
-}
-.icon-btn:hover{border-color:var(--accent); color:var(--accent)}
-.icon-btn svg{width:17px;height:17px}
-.brand-badge svg{width:16px;height:16px}
-.dz-icon svg{width:34px;height:34px}
-.es-icon svg{width:32px;height:32px}
-.c-icon svg{width:18px;height:18px}
-.btn svg{width:14px;height:14px}
-.back-btn svg{width:14px;height:14px}
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <link rel="pple-touch-icon" type="image/svg+xml" href="images/favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IG Analyzer">
+  <meta name="theme-color" content="#6d28d9">
+  <title>Instagram Followers Analyzer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --bg-elev: #ffffff;
+      --border: #e5e5e5;
+      --text: #111111;
+      --text-dim: #6b6b6b;
+      --accent: #6d28d9;
+      --accent2: #ec4899;
+      --accent-soft: #f3e8ff;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --radius: 14px;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 8px 24px rgba(0, 0, 0, .04);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
 
-.container{max-width:1180px;margin:0 auto;padding:32px 24px 80px}
+    [data-theme="dark"] {
+      --bg: #0b0b0d;
+      --bg-elev: #141417;
+      --border: #242429;
+      --text: #f2f2f3;
+      --text-dim: #9a9aa2;
+      --accent: #a78bfa;
+      --accent2: #f472b6;
+      --accent-soft: #241a3a;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 30px rgba(0, 0, 0, .35);
+    }
 
-/* Upload screen */
-.hero{text-align:center; padding:60px 20px 20px}
-.hero h1{font-size:38px;letter-spacing:-.03em;margin:0 0 12px;font-weight:800}
-.hero p{color:var(--text-dim);font-size:16px;max-width:560px;margin:0 auto 28px;line-height:1.6}
-.dropzone{
-  max-width:640px;margin:0 auto;border:2px dashed var(--border);border-radius:20px;padding:52px 24px;
-  background:var(--bg-elev);cursor:pointer;transition:.2s;
-}
-.dropzone:hover, .dropzone.drag{border-color:var(--accent); background:var(--accent-soft)}
-.dropzone .dz-icon{font-size:40px;margin-bottom:14px}
-.dropzone h3{margin:0 0 6px;font-size:17px;font-weight:700}
-.dropzone p{margin:0;color:var(--text-dim);font-size:13.5px}
-.dropzone input{display:none}
-.browse-btn{
-  margin-top:18px;display:inline-block;padding:10px 22px;border-radius:10px;background:var(--text);color:var(--bg);
-  font-weight:600;font-size:13.5px;border:none;cursor:pointer;
-}
-.upload-progress{max-width:640px;margin:24px auto 0;display:none}
-.upload-progress.show{display:block}
-.progress-track{height:8px;border-radius:99px;background:var(--border);overflow:hidden}
-.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .2s}
-.progress-label{font-size:12.5px;color:var(--text-dim);margin-top:8px;text-align:center}
-.error-box{
-  max-width:640px;margin:20px auto 0;padding:14px 16px;border-radius:12px;background:#fef2f2;color:#991b1b;
-  border:1px solid #fecaca;font-size:13.5px;display:none;
-}
-[data-theme="dark"] .error-box{background:#2a1414;color:#fca5a5;border-color:#4a1f1f}
-.error-box.show{display:block}
+    .icon {
+      width: 1em;
+      height: 1em;
+      display: inline-block;
+      vertical-align: -0.125em;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
 
-/* Dashboard */
-.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:12px}
-.dash-header h2{font-size:24px;margin:0;letter-spacing:-.02em}
-.dash-sub{color:var(--text-dim);font-size:13.5px;margin-top:4px}
-.btn{padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-elev);color:var(--text);font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
-.btn:hover{border-color:var(--accent);color:var(--accent)}
-.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff}
-.btn.primary:hover{filter:brightness(1.08); color:#fff}
-.btn.danger:hover{border-color:var(--danger);color:var(--danger)}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.btn.sm{padding:6px 11px;font-size:12.5px;border-radius:8px}
+    .icon-lg {
+      width: 22px;
+      height: 22px
+    }
 
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:36px}
-.card{
-  background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius);padding:18px;
-  cursor:pointer;transition:.18s; box-shadow:var(--shadow); position:relative; overflow:hidden;
-}
-.card:hover{transform:translateY(-2px); border-color:var(--accent)}
-.card .card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.card .c-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--accent-soft)}
-.card .c-count{font-size:26px;font-weight:800;letter-spacing:-.02em}
-.card .c-title{font-size:12.5px;color:var(--text-dim);margin-top:3px;font-weight:600}
-.card.accent .c-icon{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+    * {
+      box-sizing: border-box
+    }
 
-/* Detail view */
-.detail-header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-.back-btn{cursor:pointer;color:var(--text-dim);font-size:13.5px;display:flex;align-items:center;gap:5px}
-.back-btn:hover{color:var(--accent)}
-.toolbar{
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg-elev);border:1px solid var(--border);
-  padding:12px;border-radius:12px;margin:18px 0 14px;
-}
-.search-input{
-  flex:1;min-width:180px;padding:9px 12px;border-radius:9px;border:1px solid var(--border);background:var(--bg);
-  color:var(--text);font-size:13.5px;
-}
-.search-input:focus{outline:none;border-color:var(--accent)}
-select.sort-select{padding:9px 10px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px}
-.spacer{flex:1}
-.selected-bar{
-  display:none;align-items:center;gap:10px;background:var(--accent-soft);border:1px solid var(--accent);
-  padding:10px 14px;border-radius:12px;margin-bottom:14px;font-size:13px;flex-wrap:wrap;
-}
-.selected-bar.show{display:flex}
-.selected-bar b{color:var(--accent)}
+    html,
+    body {
+      margin: 0;
+      padding: 0
+    }
 
-.table-wrap{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg-elev)}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-thead th{
-  background:var(--bg-elev);text-align:left;padding:11px 14px;font-weight:600;
-  color:var(--text-dim);font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);
-  cursor:pointer; user-select:none; white-space:nowrap;
-}
-thead th:hover{color:var(--accent)}
-tbody td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
-tbody tr:last-child td{border-bottom:none}
-tbody tr:hover{background:var(--accent-soft)}
-.row-num{color:var(--text-dim);width:36px}
-.user-cell{display:flex;align-items:center;gap:10px}
-.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0}
-.uname{font-weight:600;text-decoration:none}
-.uname:hover{color:var(--accent)}
-.date-cell{color:var(--text-dim);font-size:12.5px;white-space:nowrap}
-input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
-.empty-state{padding:70px 20px;text-align:center;color:var(--text-dim)}
-.empty-state .es-icon{font-size:38px;margin-bottom:10px}
-.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;font-size:12.5px;color:var(--text-dim);flex-wrap:wrap;gap:10px}
-.pagination .pg-btns{display:flex;gap:6px}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+      transition: background .25s ease, color .25s ease;
+    }
 
-.toast-wrap{position:fixed;bottom:22px;right:22px;z-index:100;display:flex;flex-direction:column;gap:8px}
-.toast{background:var(--text);color:var(--bg);padding:11px 16px;border-radius:10px;font-size:13px;box-shadow:var(--shadow);animation:slideIn .2s ease}
-@keyframes slideIn{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+    ::selection {
+      background: var(--accent-soft)
+    }
 
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:90;padding:20px}
-.modal-overlay.show{display:flex}
-.modal{background:var(--bg-elev);border-radius:16px;padding:26px;max-width:420px;width:100%;box-shadow:var(--shadow);border:1px solid var(--border)}
-.modal h3{margin:0 0 10px;font-size:17px}
-.modal p{color:var(--text-dim);font-size:13.5px;line-height:1.6;margin:0 0 20px}
-.modal .modal-actions{display:flex;justify-content:flex-end;gap:8px}
+    a {
+      color: inherit
+    }
 
-.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
-@keyframes sp{to{transform:rotate(360deg)}}
+    button {
+      font-family: inherit
+    }
 
-footer.appfooter{text-align:center;color:var(--text-dim);font-size:12px;padding:30px 0 10px}
+    .hidden {
+      display: none !important
+    }
 
-/* How-to-export guide */
-.guide{max-width:900px;margin:44px auto 0}
-.guide-head{text-align:center;margin-bottom:24px}
-.guide-head h2{font-size:22px;margin:0 0 8px;letter-spacing:-.02em}
-.guide-head p{color:var(--text-dim);font-size:13.5px;margin:0;line-height:1.6}
-.guide-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
-.guide-step{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
-.guide-step .gs-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.guide-step .gs-num{width:26px;height:26px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;flex-shrink:0}
-.guide-step .gs-icon{color:var(--accent)}
-.guide-step h4{margin:0;font-size:13.5px;font-weight:700}
-.guide-step p{margin:0 0 10px;color:var(--text-dim);font-size:12.5px;line-height:1.55}
-.carousel{
-  display:flex;width:100%;padding:8px;gap:10px;background:var(--bg-elev);border:1px solid var(--border);
-  border-radius:var(--radius);height:500px;overflow-x:auto;scroll-snap-type:x mandatory;box-shadow:var(--shadow);
-  margin-top:22px;
-}
-.carousel-item{flex:0 0 auto;scroll-snap-align:start;height:100%}
-.carousel-item img{height:100%;width:auto;display:block;border-radius:10px;object-fit:contain}
-@media(max-width:640px){ .carousel{height:340px} }
-.guide-note{
-  display:flex;gap:10px;align-items:flex-start;margin-top:16px;padding:12px 14px;border-radius:12px;
-  background:var(--accent-soft);color:var(--accent);font-size:12.5px;line-height:1.6;
-}
-.guide-note svg{flex-shrink:0;margin-top:2px}
-.guide-note span{color:var(--text)}
+    /* Top bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      background: color-mix(in srgb, var(--bg) 85%, transparent);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
 
-@media(max-width:640px){
-  .container{padding:20px 14px 60px}
-  .hero h1{font-size:26px}
-  thead th{position:static}
-  .cards-grid{grid-template-columns:repeat(2,1fr)}
-}
-</style>
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -.02em
+    }
+
+    .brand-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 15px;
+    }
+
+    .privacy-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--bg-elev);
+    }
+
+    .privacy-pill .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success)
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-elev);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: .15s;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+    .icon-btn svg {
+      width: 17px;
+      height: 17px
+    }
+
+    .brand-badge svg {
+      width: 16px;
+      height: 16px
+    }
+
+    .dz-icon svg {
+      width: 34px;
+      height: 34px
+    }
+
+    .es-icon svg {
+      width: 32px;
+      height: 32px
+    }
+
+    .c-icon svg {
+      width: 18px;
+      height: 18px
+    }
+
+    .btn svg {
+      width: 14px;
+      height: 14px
+    }
+
+    .back-btn svg {
+      width: 14px;
+      height: 14px
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 80px
+    }
+
+    /* Upload screen */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 20px
+    }
+
+    .hero h1 {
+      font-size: 38px;
+      letter-spacing: -.03em;
+      margin: 0 0 12px;
+      font-weight: 800
+    }
+
+    .hero p {
+      color: var(--text-dim);
+      font-size: 16px;
+      max-width: 560px;
+      margin: 0 auto 28px;
+      line-height: 1.6
+    }
+
+    .dropzone {
+      max-width: 640px;
+      margin: 0 auto;
+      border: 2px dashed var(--border);
+      border-radius: 20px;
+      padding: 52px 24px;
+      background: var(--bg-elev);
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .dropzone:hover,
+    .dropzone.drag {
+      border-color: var(--accent);
+      background: var(--accent-soft)
+    }
+
+    .dropzone .dz-icon {
+      font-size: 40px;
+      margin-bottom: 14px
+    }
+
+    .dropzone h3 {
+      margin: 0 0 6px;
+      font-size: 17px;
+      font-weight: 700
+    }
+
+    .dropzone p {
+      margin: 0;
+      color: var(--text-dim);
+      font-size: 13.5px
+    }
+
+    .dropzone input {
+      display: none
+    }
+
+    .browse-btn {
+      margin-top: 18px;
+      display: inline-block;
+      padding: 10px 22px;
+      border-radius: 10px;
+      background: var(--text);
+      color: var(--bg);
+      font-weight: 600;
+      font-size: 13.5px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .upload-progress {
+      max-width: 640px;
+      margin: 24px auto 0;
+      display: none
+    }
+
+    .upload-progress.show {
+      display: block
+    }
+
+    .progress-track {
+      height: 8px;
+      border-radius: 99px;
+      background: var(--border);
+      overflow: hidden
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width .2s
+    }
+
+    .progress-label {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      margin-top: 8px;
+      text-align: center
+    }
+
+    .error-box {
+      max-width: 640px;
+      margin: 20px auto 0;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      font-size: 13.5px;
+      display: none;
+    }
+
+    [data-theme="dark"] .error-box {
+      background: #2a1414;
+      color: #fca5a5;
+      border-color: #4a1f1f
+    }
+
+    .error-box.show {
+      display: block
+    }
+
+    /* Dashboard */
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 26px;
+      flex-wrap: wrap;
+      gap: 12px
+    }
+
+    .dash-header h2 {
+      font-size: 24px;
+      margin: 0;
+      letter-spacing: -.02em
+    }
+
+    .dash-sub {
+      color: var(--text-dim);
+      font-size: 13.5px;
+      margin-top: 4px
+    }
+
+    .btn {
+      padding: 9px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-elev);
+      color: var(--text);
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: .15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      color: #fff
+    }
+
+    .btn.primary:hover {
+      filter: brightness(1.08);
+      color: #fff
+    }
+
+    .btn.danger:hover {
+      border-color: var(--danger);
+      color: var(--danger)
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .btn.sm {
+      padding: 6px 11px;
+      font-size: 12.5px;
+      border-radius: 8px
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 36px
+    }
+
+    .card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      cursor: pointer;
+      transition: .18s;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent)
+    }
+
+    .card .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px
+    }
+
+    .card .c-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      background: var(--accent-soft)
+    }
+
+    .card .c-count {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -.02em
+    }
+
+    .card .c-title {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      margin-top: 3px;
+      font-weight: 600
+    }
+
+    .card.accent .c-icon {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff
+    }
+
+    /* Detail view */
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px
+    }
+
+    .back-btn {
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .back-btn:hover {
+      color: var(--accent)
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 12px;
+      margin: 18px 0 14px;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 180px;
+      padding: 9px 12px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13.5px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent)
+    }
+
+    select.sort-select {
+      padding: 9px 10px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px
+    }
+
+    .spacer {
+      flex: 1
+    }
+
+    .selected-bar {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .selected-bar.show {
+      display: flex
+    }
+
+    .selected-bar b {
+      color: var(--accent)
+    }
+
+    .table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      background: var(--bg-elev)
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px
+    }
+
+    thead th {
+      background: var(--bg-elev);
+      text-align: left;
+      padding: 11px 14px;
+      font-weight: 600;
+      color: var(--text-dim);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    thead th:hover {
+      color: var(--accent)
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none
+    }
+
+    tbody tr:hover {
+      background: var(--accent-soft)
+    }
+
+    .row-num {
+      color: var(--text-dim);
+      width: 36px
+    }
+
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0
+    }
+
+    .uname {
+      font-weight: 600;
+      text-decoration: none
+    }
+
+    .uname:hover {
+      color: var(--accent)
+    }
+
+    .date-cell {
+      color: var(--text-dim);
+      font-size: 12.5px;
+      white-space: nowrap
+    }
+
+    input[type=checkbox] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer
+    }
+
+    .empty-state {
+      padding: 70px 20px;
+      text-align: center;
+      color: var(--text-dim)
+    }
+
+    .empty-state .es-icon {
+      font-size: 38px;
+      margin-bottom: 10px
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      font-size: 12.5px;
+      color: var(--text-dim);
+      flex-wrap: wrap;
+      gap: 10px
+    }
+
+    .pagination .pg-btns {
+      display: flex;
+      gap: 6px
+    }
+
+    .toast-wrap {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .toast {
+      background: var(--text);
+      color: var(--bg);
+      padding: 11px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      box-shadow: var(--shadow);
+      animation: slideIn .2s ease
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(8px);
+        opacity: 0
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1
+      }
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 90;
+      padding: 20px
+    }
+
+    .modal-overlay.show {
+      display: flex
+    }
+
+    .modal {
+      background: var(--bg-elev);
+      border-radius: 16px;
+      padding: 26px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border)
+    }
+
+    .modal h3 {
+      margin: 0 0 10px;
+      font-size: 17px
+    }
+
+    .modal p {
+      color: var(--text-dim);
+      font-size: 13.5px;
+      line-height: 1.6;
+      margin: 0 0 20px
+    }
+
+    .modal .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px
+    }
+
+    .spin {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: sp .7s linear infinite
+    }
+
+    @keyframes sp {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    footer.appfooter {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 12px;
+      padding: 30px 0 10px
+    }
+
+    /* ===== STATS SECTION ===== */
+    .stats-section {
+      margin-top: 8px;
+      margin-bottom: 40px
+    }
+
+    .stats-section-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin: 0 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stats-section-title .s-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 99px;
+      letter-spacing: .04em;
+    }
+
+    /* Share modal */
+    .share-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .6);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 95;
+      padding: 20px;
+    }
+
+    .share-modal-overlay.show {
+      display: flex
+    }
+
+    .share-modal {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .35);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .share-modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .share-modal-head h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -.02em
+    }
+
+    .share-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .share-close:hover {
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+    .share-canvas-wrap {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #0d0d14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+    }
+
+    .share-canvas-wrap canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 12px
+    }
+
+    .share-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .share-actions .btn {
+      flex: 1;
+      justify-content: center;
+      min-width: 120px
+    }
+
+    .share-tip {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      text-align: center;
+      padding: 2px 0
+    }
+
+    /* Ratio row */
+    .stat-ratio-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px
+    }
+
+    .stat-ratio-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px 14px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-ratio-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      opacity: 0.04;
+    }
+
+    .src-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 10px
+    }
+
+    .src-value {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1
+    }
+
+    .src-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 5px
+    }
+
+    .src-bar {
+      height: 5px;
+      border-radius: 99px;
+      background: var(--border);
+      margin-top: 12px;
+      overflow: hidden
+    }
+
+    .src-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 1s cubic-bezier(.4, 0, .2, 1)
+    }
+
+    /* Charts row */
+    .stat-charts-row {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 14px;
+      margin-bottom: 20px
+    }
+
+    @media(max-width:900px) {
+      .stat-charts-row {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .stat-chart-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .scc-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 16px
+    }
+
+    /* Donut chart */
+    .donut-wrap {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      flex-wrap: wrap
+    }
+
+    .donut-svg-wrap {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      flex-shrink: 0
+    }
+
+    .donut-svg-wrap svg {
+      width: 140px;
+      height: 140px
+    }
+
+    .donut-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .donut-center-val {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -.02em
+    }
+
+    .donut-center-lbl {
+      font-size: 10px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em
+    }
+
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1
+    }
+
+    .dl-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 13px
+    }
+
+    .dl-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0
+    }
+
+    .dl-name {
+      color: var(--text-dim);
+      font-size: 12px
+    }
+
+    .dl-val {
+      margin-left: auto;
+      font-weight: 700
+    }
+
+    /* Bar chart */
+    .bar-chart-outer {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+      scroll-behavior: smooth;
+    }
+
+    .bar-chart-outer::-webkit-scrollbar {
+      height: 5px
+    }
+
+    .bar-chart-outer::-webkit-scrollbar-track {
+      background: var(--border);
+      border-radius: 99px
+    }
+
+    .bar-chart-outer::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 99px
+    }
+
+    .bar-chart-wrap {
+      height: 185px;
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      padding: 0 8px 28px;
+      min-width: max-content;
+      width: max-content;
+    }
+
+    .bar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      width: 38px;
+      flex-shrink: 0
+    }
+
+    .bar-num {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-dim);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .3s .8s
+    }
+
+    .bar-rect {
+      width: 100%;
+      border-radius: 5px 5px 0 0;
+      background: linear-gradient(180deg, var(--accent2) 0%, var(--accent) 100%);
+      opacity: 0.85;
+      transition: height 1s cubic-bezier(.4, 0, .2, 1), opacity .15s;
+      cursor: pointer;
+    }
+
+    .bar-rect:hover {
+      opacity: 1;
+      filter: brightness(1.1)
+    }
+
+    .bar-lbl {
+      font-size: 9.5px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      transform: rotate(-40deg);
+      transform-origin: top center;
+      margin-top: 3px
+    }
+
+    .bar-chart-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-dim);
+      font-size: 13px;
+      width: 100%
+    }
+
+    /* Funnel */
+    .funnel-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px
+    }
+
+    .funnel-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .funnel-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .funnel-icon svg {
+      width: 19px;
+      height: 19px
+    }
+
+    .funnel-info {
+      flex: 1;
+      min-width: 0
+    }
+
+    .funnel-label {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 4px
+    }
+
+    .funnel-num {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -.02em
+    }
+
+    .funnel-pct {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 2px
+    }
+
+    .funnel-bar-track {
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      margin-top: 8px;
+      overflow: hidden
+    }
+
+    .funnel-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 1.1s cubic-bezier(.4, 0, .2, 1)
+    }
+
+    /* Insight cards */
+    .stat-insights-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 14px
+    }
+
+    .insight-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .insight-emoji {
+      font-size: 22px;
+      margin-bottom: 8px
+    }
+
+    .insight-title {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 6px
+    }
+
+    .insight-value {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -.01em
+    }
+
+    .insight-note {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      line-height: 1.5
+    }
+
+    @media(max-width:640px) {
+      .stat-ratio-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px
+      }
+
+      .funnel-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px
+      }
+
+      .stat-insights-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px
+      }
+
+      .stat-chart-card {
+        padding: 14px
+      }
+    }
+
+    /* How-to-export guide */
+    .guide {
+      max-width: 900px;
+      margin: 44px auto 0
+    }
+
+    .guide-head {
+      text-align: center;
+      margin-bottom: 24px
+    }
+
+    .guide-head h2 {
+      font-size: 22px;
+      margin: 0 0 8px;
+      letter-spacing: -.02em
+    }
+
+    .guide-head p {
+      color: var(--text-dim);
+      font-size: 13.5px;
+      margin: 0;
+      line-height: 1.6
+    }
+
+    .guide-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px
+    }
+
+    .guide-step {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow)
+    }
+
+    .guide-step .gs-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px
+    }
+
+    .guide-step .gs-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12.5px;
+      flex-shrink: 0
+    }
+
+    .guide-step .gs-icon {
+      color: var(--accent)
+    }
+
+    .guide-step h4 {
+      margin: 0;
+      font-size: 13.5px;
+      font-weight: 700
+    }
+
+    .guide-step p {
+      margin: 0 0 10px;
+      color: var(--text-dim);
+      font-size: 12.5px;
+      line-height: 1.55
+    }
+
+    .carousel {
+      display: flex;
+      width: 100%;
+      padding: 8px;
+      gap: 10px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      height: 500px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      box-shadow: var(--shadow);
+      margin-top: 22px;
+    }
+
+    .carousel-item {
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+      height: 100%
+    }
+
+    .carousel-item img {
+      height: 100%;
+      width: auto;
+      display: block;
+      border-radius: 10px;
+      object-fit: contain
+    }
+
+    @media(max-width:640px) {
+      .carousel {
+        height: 340px
+      }
+    }
+
+    .guide-note {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    .guide-note svg {
+      flex-shrink: 0;
+      margin-top: 2px
+    }
+
+    .guide-note span {
+      color: var(--text)
+    }
+
+    @media(max-width:900px) {
+      .cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 12px
+      }
+    }
+
+    @media(max-width:640px) {
+      .container {
+        padding: 18px 12px 60px
+      }
+
+      .hero h1 {
+        font-size: 26px
+      }
+
+      thead th {
+        position: static
+      }
+
+      .cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+        margin-bottom: 24px
+      }
+
+      .card {
+        padding: 14px 12px
+      }
+
+      .card .c-count {
+        font-size: 22px
+      }
+
+      .card .c-title {
+        font-size: 11.5px
+      }
+
+      .guide-steps {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px
+      }
+
+      .toolbar {
+        padding: 10px;
+        gap: 8px
+      }
+
+      .search-input {
+        width: 100%;
+        min-width: 100%
+      }
+
+      .topbar {
+        padding: 10px 14px
+      }
+
+      .dash-header {
+        margin-bottom: 18px
+      }
+
+      .dash-header h2 {
+        font-size: 20px
+      }
+    }
+  </style>
 </head>
+
 <body data-theme="light">
 
-<div class="topbar">
-  <div class="brand"><div class="brand-badge"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2 2 12l10 10 10-10L12 2Z"/></svg></div> Followers Analyzer</div>
-  <div class="top-actions">
-    <div class="privacy-pill"><span class="dot"></span> 100% Private • Data never leaves your device</div>
-    <button class="icon-btn" id="themeToggle" title="Toggle theme"></button>
-  </div>
-</div>
-
-<div class="container" id="appContainer">
-
-  <!-- UPLOAD SCREEN -->
-  <div id="uploadScreen">
-    <div class="hero">
-      <h1>See who doesn't follow you back</h1>
-      <p>Upload the Instagram data export you downloaded from Meta. Everything is analyzed locally in your browser — nothing is ever uploaded anywhere.</p>
-      <div class="dropzone" id="dropzone">
-        <div class="dz-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.27 6.96 8.73 5.04 8.73-5.04"/><path d="M12 22.08V12"/></svg></div>
-        <h3>Drop your Instagram ZIP here</h3>
-        <p>or click to browse — we only read followers/following JSON files</p>
-        <input type="file" id="fileInput" accept=".zip">
-        <div><button class="browse-btn" type="button" id="browseBtn">Choose File</button></div>
-      </div>
-      <div class="upload-progress" id="uploadProgress">
-        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="progress-label" id="progressLabel">Reading ZIP…</div>
-      </div>
-      <div class="error-box" id="errorBox"></div>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-badge"><svg class="icon" viewBox="0 0 24 24">
+          <path d="M12 2 2 12l10 10 10-10L12 2Z" />
+        </svg></div> Followers Analyzer
     </div>
-
-    <div class="guide">
-      <div class="guide-head">
-        <h2>How to get your Instagram ZIP file</h2>
-        <p>Request your data export from Instagram's settings, wait for Meta to prepare it, then download and drop the ZIP above. Scroll through the screenshots below for a visual walkthrough.</p>
-      </div>
-      <div class="guide-steps">
-        <div class="guide-step">
-          <div class="gs-top">
-            <div class="gs-num">1</div>
-            <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></span>
-            <h4>Open Settings</h4>
-          </div>
-          <p>In the Instagram app, go to your profile, then open Settings and privacy.</p>
-        </div>
-
-        <div class="guide-step">
-          <div class="gs-top">
-            <div class="gs-num">2</div>
-            <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-            <h4>Go to "Download your information"</h4>
-          </div>
-          <p>Under "Accounts Center" or "Your activity", find the data download / export option.</p>
-        </div>
-
-        <div class="guide-step">
-          <div class="gs-top">
-            <div class="gs-num">3</div>
-            <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.27 6.96 8.73 5.04 8.73-5.04"/><path d="M12 22.08V12"/></svg></span>
-            <h4>Select "Some of your information"</h4>
-          </div>
-          <p>Choose "Followers and following" as the data category to include in the export.</p>
-        </div>
-
-        <div class="guide-step">
-          <div class="gs-top">
-            <div class="gs-num">4</div>
-            <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg></span>
-            <h4>Choose format and submit</h4>
-          </div>
-          <p>Set the format to JSON, pick a date range, then submit the export request.</p>
-        </div>
-
-        <div class="guide-step">
-          <div class="gs-top">
-            <div class="gs-num">5</div>
-            <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
-            <h4>Wait for the email</h4>
-          </div>
-          <p>Meta emails you once the export is ready — this can take from a few minutes up to 48 hours.</p>
-        </div>
-
-        <div class="guide-step">
-          <div class="gs-top">
-            <div class="gs-num">6</div>
-            <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></span>
-            <h4>Download the ZIP</h4>
-          </div>
-          <p>Open the email or go back to "Download your information" and download the ZIP file.</p>
-        </div>
-      </div>
-
-      <div class="carousel" id="guideCarousel">
-        <div class="carousel-item"><img src="images/ig_1_v2.png" alt="Instagram export step 1"></div>
-        <div class="carousel-item"><img src="images/ig_2_v2.png" alt="Instagram export step 2"></div>
-        <div class="carousel-item"><img src="images/ig_3_v2.png" alt="Instagram export step 3"></div>
-        <div class="carousel-item"><img src="images/ig_4_v2.png" alt="Instagram export step 4"></div>
-        <div class="carousel-item"><img src="images/ig_5_v2.png" alt="Instagram export step 5"></div>
-        <div class="carousel-item"><img src="images/ig_6_v2.png" alt="Instagram export step 6"></div>
-        <div class="carousel-item"><img src="images/ig_7_v2.png" alt="Instagram export step 7"></div>
-        <div class="carousel-item"><img src="images/ig_8_v2.png" alt="Instagram export step 8"></div>
-        <div class="carousel-item"><img src="images/ig_9_v2.png" alt="Instagram export step 9"></div>
-        <div class="carousel-item"><img src="images/ig_10_v2.png" alt="Instagram export step 10"></div>
-      </div>
-
-      <div class="guide-note">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-        <span>Once you have the ZIP file, drop it in the box above. It's read entirely in your browser and never uploaded anywhere.</span>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- DASHBOARD SCREEN -->
-  <div id="dashboardScreen" class="hidden">
-    <div class="dash-header">
-      <div>
-        <h2>Dashboard</h2>
-        <div class="dash-sub" id="dashSub"></div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn" id="newUploadBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg> Analyze another export</button>
-      </div>
-    </div>
-    <div class="cards-grid" id="cardsGrid"></div>
-  </div>
-
-  <!-- DETAIL SCREEN -->
-  <div id="detailScreen" class="hidden">
-    <div class="detail-header">
-      <div class="back-btn" id="backBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg> Back to dashboard</div>
-    </div>
-    <div class="dash-header" style="margin-top:6px">
-      <div>
-        <h2 id="detailTitle">List</h2>
-        <div class="dash-sub" id="detailSub"></div>
-      </div>
-      <button class="btn primary" id="openAllBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg> Open All Profiles</button>
-    </div>
-
-    <div class="toolbar">
-      <input class="search-input" id="searchInput" placeholder="Search username…">
-      <select class="sort-select" id="sortSelect">
-        <option value="newest" selected>Newest first</option>
-        <option value="oldest">Oldest first</option>
-        <option value="az">Sort A–Z</option>
-        <option value="za">Sort Z–A</option>
-      </select>
-      <button class="btn sm" id="selectAllBtn">Select All</button>
-      <button class="btn sm" id="unselectAllBtn">Unselect All</button>
-      <div class="spacer"></div>
-      <button class="btn sm" id="exportCsvBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> CSV</button>
-      <button class="btn sm" id="exportJsonBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> JSON</button>
-      <button class="btn sm" id="exportExcelBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Excel</button>
-    </div>
-
-    <div class="selected-bar" id="selectedBar">
-      <span><b id="selCount">0</b> selected</span>
-      <button class="btn sm" id="copyUsernamesBtn">Copy usernames</button>
-      <button class="btn sm" id="copyUrlsBtn">Copy URLs</button>
-      <button class="btn sm" id="exportSelectedBtn">Export selected (CSV)</button>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:34px"><input type="checkbox" id="headerCheckbox"></th>
-            <th style="width:44px">#</th>
-            <th data-sort="username">User</th>
-            <th data-sort="date">Date</th>
-            <th>Profile</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-      <div class="empty-state hidden" id="emptyState">
-        <div class="es-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
-        <div>No results found</div>
-      </div>
-      <div class="pagination" id="pagination"></div>
+    <div class="top-actions">
+      <button class="icon-btn" id="themeToggle" title="Toggle theme"></button>
     </div>
   </div>
 
-</div>
+  <div class="container" id="appContainer">
 
-<footer class="appfooter">Runs 100% in your browser. No servers, no tracking, no data collection.</footer>
+    <!-- UPLOAD SCREEN -->
+    <div id="uploadScreen">
+      <div class="hero">
+        <h1>See who doesn't follow you back</h1>
+        <p>Upload the Instagram data export you downloaded from Meta. Everything is analyzed locally in your browser —
+          nothing is ever uploaded anywhere.</p>
+        <div class="dropzone" id="dropzone">
+          <div class="dz-icon"><svg class="icon" viewBox="0 0 24 24">
+              <path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+              <path d="m3.27 6.96 8.73 5.04 8.73-5.04" />
+              <path d="M12 22.08V12" />
+            </svg></div>
+          <h3>Drop your Instagram ZIP here</h3>
+          <p>or click to browse — we only read followers/following JSON files</p>
+          <input type="file" id="fileInput" accept=".zip">
+          <div><button class="browse-btn" type="button" id="browseBtn">Choose File</button></div>
+        </div>
+        <div class="upload-progress" id="uploadProgress">
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-label" id="progressLabel">Reading ZIP…</div>
+        </div>
+        <div class="error-box" id="errorBox"></div>
+      </div>
 
-<div class="toast-wrap" id="toastWrap"></div>
+      <div class="guide">
+        <div class="guide-head">
+          <h2>How to get your Instagram ZIP file</h2>
+          <p>Request your data export from Instagram's settings, wait for Meta to prepare it, then download and drop the
+            ZIP above. Scroll through the screenshots below for a visual walkthrough.</p>
+        </div>
+        <div class="guide-steps">
+          <div class="guide-step">
+            <div class="gs-top">
+              <div class="gs-num">1</div>
+              <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="3" />
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+                </svg></span>
+              <h4>Open Settings</h4>
+            </div>
+            <p>In the Instagram app, go to your profile, then open Settings and privacy.</p>
+          </div>
 
-<div class="modal-overlay" id="confirmModal">
-  <div class="modal">
-    <h3>Open profiles in new tabs?</h3>
-    <p id="confirmModalText"></p>
-    <div class="modal-actions">
-      <button class="btn" id="modalCancel">Cancel</button>
-      <button class="btn primary" id="modalConfirm">Continue</button>
+          <div class="guide-step">
+            <div class="gs-top">
+              <div class="gs-num">2</div>
+              <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                  <rect x="3" y="11" width="18" height="10" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg></span>
+              <h4>Go to "Download your information"</h4>
+            </div>
+            <p>Under "Accounts Center" or "Your activity", find the data download / export option.</p>
+          </div>
+
+          <div class="guide-step">
+            <div class="gs-top">
+              <div class="gs-num">3</div>
+              <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                  <path
+                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                  <path d="m3.27 6.96 8.73 5.04 8.73-5.04" />
+                  <path d="M12 22.08V12" />
+                </svg></span>
+              <h4>Select "Some of your information"</h4>
+            </div>
+            <p>Choose "Followers and following" as the data category to include in the export.</p>
+          </div>
+
+          <div class="guide-step">
+            <div class="gs-top">
+              <div class="gs-num">4</div>
+              <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                  <path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7" />
+                  <path d="M16 6l-4-4-4 4" />
+                  <path d="M12 2v14" />
+                </svg></span>
+              <h4>Choose format and submit</h4>
+            </div>
+            <p>Set the format to JSON, pick a date range, then submit the export request.</p>
+          </div>
+
+          <div class="guide-step">
+            <div class="gs-top">
+              <div class="gs-num">5</div>
+              <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6l4 2" />
+                </svg></span>
+              <h4>Wait for the email</h4>
+            </div>
+            <p>Meta emails you once the export is ready — this can take from a few minutes up to 48 hours.</p>
+          </div>
+
+          <div class="guide-step">
+            <div class="gs-top">
+              <div class="gs-num">6</div>
+              <span class="gs-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <path d="M7 10l5 5 5-5" />
+                  <path d="M12 15V3" />
+                </svg></span>
+              <h4>Download the ZIP</h4>
+            </div>
+            <p>Open the email or go back to "Download your information" and download the ZIP file.</p>
+          </div>
+        </div>
+
+        <div class="carousel" id="guideCarousel">
+          <div class="carousel-item"><img src="images/ig_1_v2.png" alt="Instagram export step 1"></div>
+          <div class="carousel-item"><img src="images/ig_2_v2.png" alt="Instagram export step 2"></div>
+          <div class="carousel-item"><img src="images/ig_3_v2.png" alt="Instagram export step 3"></div>
+          <div class="carousel-item"><img src="images/ig_4_v2.png" alt="Instagram export step 4"></div>
+          <div class="carousel-item"><img src="images/ig_5_v2.png" alt="Instagram export step 5"></div>
+          <div class="carousel-item"><img src="images/ig_6_v2.png" alt="Instagram export step 6"></div>
+          <div class="carousel-item"><img src="images/ig_7_v2.png" alt="Instagram export step 7"></div>
+          <div class="carousel-item"><img src="images/ig_8_v2.png" alt="Instagram export step 8"></div>
+          <div class="carousel-item"><img src="images/ig_9_v2.png" alt="Instagram export step 9"></div>
+          <div class="carousel-item"><img src="images/ig_10_v2.png" alt="Instagram export step 10"></div>
+        </div>
+
+        <div class="guide-note">
+          <svg class="icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+          </svg>
+          <span>Once you have the ZIP file, drop it in the box above. It's read entirely in your browser and never
+            uploaded anywhere.</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- DASHBOARD SCREEN -->
+    <div id="dashboardScreen" class="hidden">
+      <div class="dash-header">
+        <div>
+          <h2>Dashboard</h2>
+          <div class="dash-sub" id="dashSub"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="newUploadBtn"><svg class="icon" viewBox="0 0 24 24">
+              <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+              <path d="M21 3v6h-6" />
+            </svg> Analyze another export</button>
+        </div>
+      </div>
+      <div class="cards-grid" id="cardsGrid"></div>
+
+      <!-- STATS SECTION -->
+      <div class="stats-section" id="statsSection">
+        <div class="stats-section-title">
+          <svg class="icon" style="color:var(--accent)" viewBox="0 0 24 24">
+            <path d="M3 3v18h18" />
+            <path d="m19 9-5 5-4-4-3 3" />
+          </svg>
+          Analytics &amp; Insights
+          <span class="s-badge">LIVE</span>
+          <button class="btn sm" id="shareInsightsBtn" style="margin-left:auto">
+            <svg class="icon" viewBox="0 0 24 24">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <path d="m8.59 13.51 6.83 3.98" />
+              <path d="m15.41 6.51-6.82 3.98" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Ratio Cards Row -->
+        <div class="stat-ratio-row" id="statRatioRow"></div>
+
+        <!-- Charts Row: Donut + Bar -->
+        <div class="stat-charts-row">
+          <div class="stat-chart-card">
+            <div class="scc-title">Audience Breakdown</div>
+            <div class="donut-wrap">
+              <div class="donut-svg-wrap">
+                <svg viewBox="0 0 36 36" id="donutSvg"></svg>
+                <div class="donut-center">
+                  <div class="donut-center-val" id="donutCenterVal">—</div>
+                  <div class="donut-center-lbl">Total</div>
+                </div>
+              </div>
+              <div class="donut-legend" id="donutLegend"></div>
+            </div>
+          </div>
+          <div class="stat-chart-card">
+            <div class="scc-title">Monthly Follower Activity</div>
+            <div class="bar-chart-outer">
+              <div class="bar-chart-wrap" id="barChartWrap"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Funnel Row -->
+        <div class="funnel-row" id="funnelRow"></div>
+
+        <!-- Insight Cards -->
+        <div class="stat-insights-row" id="insightsRow"></div>
+      </div>
+    </div>
+
+    <!-- DETAIL SCREEN -->
+    <div id="detailScreen" class="hidden">
+      <div class="detail-header">
+        <div class="back-btn" id="backBtn"><svg class="icon" viewBox="0 0 24 24">
+            <path d="M19 12H5" />
+            <path d="m12 19-7-7 7-7" />
+          </svg> Back to dashboard</div>
+      </div>
+      <div class="dash-header" style="margin-top:6px">
+        <div>
+          <h2 id="detailTitle">List</h2>
+          <div class="dash-sub" id="detailSub"></div>
+        </div>
+        <button class="btn primary" id="openAllBtn"><svg class="icon" viewBox="0 0 24 24">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <path d="M15 3h6v6" />
+            <path d="M10 14 21 3" />
+          </svg> Open All Profiles</button>
+      </div>
+
+      <div class="toolbar">
+        <input class="search-input" id="searchInput" placeholder="Search username…">
+        <select class="sort-select" id="sortSelect">
+          <option value="newest" selected>Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="az">Sort A–Z</option>
+          <option value="za">Sort Z–A</option>
+        </select>
+        <button class="btn sm" id="selectAllBtn">Select All</button>
+        <button class="btn sm" id="unselectAllBtn">Unselect All</button>
+        <button class="btn sm" id="copyAllHandlesBtn"><svg class="icon" viewBox="0 0 24 24">
+            <path d="M4 9h1a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3H4" />
+            <path d="M20 9h-1a3 3 0 0 0-3 3v1a3 3 0 0 0 3 3h1" />
+            <path d="M8 12h8" />
+          </svg> Copy @handles</button>
+        <div class="spacer"></div>
+        <button class="btn sm" id="exportCsvBtn"><svg class="icon" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <path d="M7 10l5 5 5-5" />
+            <path d="M12 15V3" />
+          </svg> CSV</button>
+        <button class="btn sm" id="exportJsonBtn"><svg class="icon" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <path d="M7 10l5 5 5-5" />
+            <path d="M12 15V3" />
+          </svg> JSON</button>
+        <button class="btn sm" id="exportExcelBtn"><svg class="icon" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <path d="M7 10l5 5 5-5" />
+            <path d="M12 15V3" />
+          </svg> Excel</button>
+      </div>
+
+      <div class="selected-bar" id="selectedBar">
+        <span><b id="selCount">0</b> selected</span>
+        <button class="btn sm" id="copyHandlesBtn"><svg class="icon" viewBox="0 0 24 24">
+            <path d="M4 9h1a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3H4" />
+            <path d="M20 9h-1a3 3 0 0 0-3 3v1a3 3 0 0 0 3 3h1" />
+            <path d="M8 12h8" />
+          </svg> Copy @handles</button>
+        <button class="btn sm" id="copyUsernamesBtn">Copy usernames</button>
+        <button class="btn sm" id="copyUrlsBtn">Copy URLs</button>
+        <button class="btn sm" id="exportSelectedBtn">Export selected (CSV)</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:34px"><input type="checkbox" id="headerCheckbox"></th>
+              <th style="width:44px">#</th>
+              <th data-sort="username">User</th>
+              <th data-sort="date">Date</th>
+              <th>Profile</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+        <div class="empty-state hidden" id="emptyState">
+          <div class="es-icon"><svg class="icon" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg></div>
+          <div>No results found</div>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="appfooter">Runs 100% in your browser. No servers, no tracking, no data collection.</footer>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <h3>Open profiles in new tabs?</h3>
+      <p id="confirmModalText"></p>
+      <div class="modal-actions">
+        <button class="btn" id="modalCancel">Cancel</button>
+        <button class="btn primary" id="modalConfirm">Continue</button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-(function(){
-  "use strict";
+  <!-- SHARE INSIGHTS MODAL -->
+  <div class="share-modal-overlay" id="shareModal">
+    <div class="share-modal">
+      <div class="share-modal-head">
+        <h3>📤 Share Insights</h3>
+        <button class="share-close" id="shareClose">&times;</button>
+      </div>
+      <div class="share-canvas-wrap" id="shareCanvasWrap"></div>
+      <div class="share-actions">
+        <button class="btn primary" id="shareDownloadBtn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <path d="M7 10l5 5 5-5" />
+            <path d="M12 15V3" />
+          </svg>
+          Download PNG
+        </button>
+        <button class="btn" id="shareCopyBtn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <rect x="9" y="9" width="13" height="13" rx="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          Copy to Clipboard
+        </button>
+      </div>
+      <div class="share-tip">💡 Long-press the image to save on mobile</div>
+    </div>
+  </div>
 
-  /* ---------------- THEME ---------------- */
-  const themeToggle = document.getElementById('themeToggle');
-  const ICON_SUN = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
-  const ICON_MOON = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
-  function applyTheme(t){ document.body.setAttribute('data-theme', t); themeToggle.innerHTML = t==='dark' ? ICON_SUN : ICON_MOON; }
-  applyTheme('light');
-  themeToggle.addEventListener('click', ()=>{
-    const cur = document.body.getAttribute('data-theme');
-    applyTheme(cur==='dark' ? 'light' : 'dark');
-  });
+  <script>
+    (function () {
+      "use strict";
 
-  /* ---------------- TOAST ---------------- */
-  function toast(msg){
-    const wrap = document.getElementById('toastWrap');
-    const el = document.createElement('div');
-    el.className='toast'; el.textContent = msg;
-    wrap.appendChild(el);
-    setTimeout(()=>{ el.style.opacity='0'; el.style.transition='.3s'; setTimeout(()=>el.remove(),300); }, 2400);
-  }
-
-  /* ---------------- STATE ---------------- */
-  const state = {
-    followers: new Map(),   // username -> {username, url, timestamp}
-    following: new Map(),
-    pending: [],
-    recentRequests: [],
-    unfollowed: [],
-    blocked: [],
-    restricted: [],
-    customLists: [],
-    notFollowingBack: [],
-    youDontFollowBack: [],
-  };
-
-  let currentView = null;      // key of current detail list
-  let currentList = [];        // full array for current view
-  let filtered = [];
-  let selected = new Set();
-  let sortMode = 'newest';
-  let searchTerm = '';
-  let page = 1;
-  const PAGE_SIZE = 50;
-
-  /* ---------------- HELPERS ---------------- */
-  function igUrl(username){ return 'https://www.instagram.com/' + username + '/'; }
-  function fmtDate(ts){
-    if(!ts) return '—';
-    const d = new Date(ts*1000);
-    return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
-  }
-  function initials(u){ return (u||'?').slice(0,2).toUpperCase(); }
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-
-  function extractStringListEntries(arr){
-    // Handles arrays of {title, string_list_data:[{href,value,timestamp}]}
-    const out = [];
-    if(!Array.isArray(arr)) return out;
-    arr.forEach(item=>{
-      const sld = item.string_list_data;
-      if(Array.isArray(sld)){
-        sld.forEach(e=>{
-          let username = e.value;
-          if(!username && e.href){
-            const parts = e.href.split('/').filter(Boolean);
-            username = parts[parts.length-1];
-          }
-          if(!username && item.title) username = item.title;
-          if(username){
-            const name = (item.title && item.title !== username) ? item.title : '';
-            out.push({ username: username, name: name, url: e.href || igUrl(username), timestamp: e.timestamp || 0 });
-          }
-        });
-      }
-    });
-    return out;
-  }
-
-  function extractLabelValueEntries(arr){
-    // For pending/recent requests style: [{timestamp, label_values:[{label,value}], fbid}]
-    const out = [];
-    if(!Array.isArray(arr)) return out;
-    arr.forEach(item=>{
-      let username = '';
-      let name = '';
-      if(Array.isArray(item.label_values)){
-        const uField = item.label_values.find(l => (l.label||'').toLowerCase()==='username');
-        const nField = item.label_values.find(l => (l.label||'').toLowerCase()==='name');
-        if(uField) username = uField.value;
-        if(nField) name = nField.value || '';
-      }
-      if(!username && item.string_list_data){
-        const sld = item.string_list_data;
-        if(sld[0]) username = sld[0].value || '';
-      }
-      if(username){
-        out.push({ username: username, name: name, url: igUrl(username), timestamp: item.timestamp || 0 });
-      }
-    });
-    return out;
-  }
-
-  function toMap(entries){
-    const m = new Map();
-    entries.forEach(e=>{ if(!m.has(e.username)) m.set(e.username, e); });
-    return m;
-  }
-
-  /* ---------------- ZIP PARSING ---------------- */
-  const fileInput = document.getElementById('fileInput');
-  const dropzone = document.getElementById('dropzone');
-  const browseBtn = document.getElementById('browseBtn');
-  const uploadProgress = document.getElementById('uploadProgress');
-  const progressFill = document.getElementById('progressFill');
-  const progressLabel = document.getElementById('progressLabel');
-  const errorBox = document.getElementById('errorBox');
-
-  browseBtn.addEventListener('click', ()=> fileInput.click());
-  dropzone.addEventListener('click', (e)=>{ if(e.target!==browseBtn) fileInput.click(); });
-  dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.classList.add('drag'); });
-  dropzone.addEventListener('dragleave', ()=> dropzone.classList.remove('drag'));
-  dropzone.addEventListener('drop', e=>{
-    e.preventDefault(); dropzone.classList.remove('drag');
-    if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-  });
-  fileInput.addEventListener('change', e=>{ if(e.target.files.length) handleFile(e.target.files[0]); });
-
-  function showError(msg){
-    errorBox.textContent = msg; errorBox.classList.add('show');
-    uploadProgress.classList.remove('show');
-  }
-  function clearError(){ errorBox.classList.remove('show'); errorBox.textContent=''; }
-
-  function setProgress(pct, label){
-    uploadProgress.classList.add('show');
-    progressFill.style.width = pct + '%';
-    progressLabel.textContent = label;
-  }
-
-  async function handleFile(file){
-    clearError();
-    if(!file.name.toLowerCase().endsWith('.zip')){
-      showError('Please upload a .zip file exported from Instagram (Meta "Download your information").');
-      return;
-    }
-    setProgress(8, 'Reading ZIP file…');
-    try{
-      const zip = await JSZip.loadAsync(file);
-      setProgress(25, 'Locating followers & following data…');
-
-      const fileMap = {};
-      zip.forEach((relPath, entry)=>{
-        if(!entry.dir) fileMap[relPath.toLowerCase()] = entry;
+      /* ---------------- THEME ---------------- */
+      const themeToggle = document.getElementById('themeToggle');
+      const ICON_SUN = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+      const ICON_MOON = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+      function applyTheme (t) { document.body.setAttribute('data-theme', t); themeToggle.innerHTML = t === 'dark' ? ICON_SUN : ICON_MOON; }
+      applyTheme('light');
+      themeToggle.addEventListener('click', () => {
+        const cur = document.body.getAttribute('data-theme');
+        applyTheme(cur === 'dark' ? 'light' : 'dark');
       });
 
-      function findFile(patternPart){
-        const keys = Object.keys(fileMap).filter(k => k.includes(patternPart));
-        return keys;
+      /* ---------------- TOAST ---------------- */
+      function toast (msg) {
+        const wrap = document.getElementById('toastWrap');
+        const el = document.createElement('div');
+        el.className = 'toast'; el.textContent = msg;
+        wrap.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; el.style.transition = '.3s'; setTimeout(() => el.remove(), 300); }, 2400);
       }
 
-      // followers_*.json (merge all)
-      const followerKeys = findFile('followers_').filter(k=>k.endsWith('.json'));
-      setProgress(35, 'Merging followers files…');
-      let followerEntries = [];
-      for(const k of followerKeys){
-        const txt = await fileMap[k].async('string');
-        try{
-          const data = JSON.parse(txt);
-          followerEntries = followerEntries.concat(extractStringListEntries(Array.isArray(data)?data:[]));
-        }catch(e){}
+      /* ---------------- STATE ---------------- */
+      const state = {
+        followers: new Map(),   // username -> {username, url, timestamp}
+        following: new Map(),
+        pending: [],
+        recentRequests: [],
+        unfollowed: [],
+        blocked: [],
+        restricted: [],
+        customLists: [],
+        notFollowingBack: [],
+        youDontFollowBack: [],
+        mutualFollowers: [],
+      };
+
+      let currentView = null;      // key of current detail list
+      let currentList = [];        // full array for current view
+      let filtered = [];
+      let selected = new Set();
+      let sortMode = 'newest';
+      let searchTerm = '';
+      let page = 1;
+      const PAGE_SIZE = 50;
+
+      /* ---------------- HELPERS ---------------- */
+      function igUrl (username) { return 'https://www.instagram.com/' + username + '/'; }
+      function fmtDate (ts) {
+        if (!ts) return '—';
+        const d = new Date(ts * 1000);
+        return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
       }
-      state.followers = toMap(followerEntries);
-
-      // following.json
-      setProgress(48, 'Reading following list…');
-      const followingKey = findFile('following.json')[0];
-      let followingEntries = [];
-      if(followingKey){
-        const txt = await fileMap[followingKey].async('string');
-        try{
-          const data = JSON.parse(txt);
-          const arr = data.relationships_following || data;
-          followingEntries = extractStringListEntries(Array.isArray(arr)?arr:[]);
-        }catch(e){}
-      }
-      state.following = toMap(followingEntries);
-
-      // pending_follow_requests.json
-      setProgress(58, 'Reading pending requests…');
-      state.pending = await readLabelValueList(fileMap, findFile('pending_follow_requests.json')[0]);
-
-      // recent_follow_requests.json
-      setProgress(66, 'Reading recent requests…');
-      state.recentRequests = await readLabelValueList(fileMap, findFile('recent_follow_requests.json')[0]);
-
-      // recently_unfollowed_profiles.json
-      setProgress(74, 'Reading recently unfollowed…');
-      state.unfollowed = await readLabelValueList(fileMap, findFile('recently_unfollowed_profiles.json')[0]);
-
-      // blocked_profiles.json
-      setProgress(80, 'Reading blocked profiles…');
-      state.blocked = await readLabelValueList(fileMap, findFile('blocked_profiles.json')[0]);
-
-      // restricted_profiles.json
-      setProgress(86, 'Reading restricted profiles…');
-      state.restricted = await readLabelValueList(fileMap, findFile('restricted_profiles.json')[0]);
-
-      // custom_lists.json
-      setProgress(92, 'Reading custom lists…');
-      state.customLists = await readCustomLists(fileMap, findFile('custom_lists.json')[0]);
-
-      if(state.followers.size === 0 && state.following.size === 0){
-        showError('We could not find followers_*.json or following.json inside this ZIP. Please make sure you uploaded the correct Instagram data export.');
-        return;
+      function initials (u) { return (u || '?').slice(0, 2).toUpperCase(); }
+      function escapeHtml (s) {
+        return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ c ]));
       }
 
-      setProgress(97, 'Computing comparisons…');
-      computeComparisons();
-
-      setProgress(100, 'Done!');
-      setTimeout(()=>{
-        document.getElementById('uploadScreen').classList.add('hidden');
-        document.getElementById('dashboardScreen').classList.remove('hidden');
-        renderDashboard();
-      }, 300);
-
-    }catch(err){
-      console.error(err);
-      showError('Something went wrong reading this ZIP file: ' + err.message);
-    }
-  }
-
-  async function readLabelValueList(fileMap, key){
-    if(!key) return [];
-    try{
-      const txt = await fileMap[key].async('string');
-      const data = JSON.parse(txt);
-      const arr = Array.isArray(data) ? data :
-        (data.relationships_permanent_or_from_report || data.relationships_unfollowed_users ||
-         data.relationships_blocked_users || data.relationships_restricted_users ||
-         data.relationships_follow_requests_sent || Object.values(data)[0] || []);
-      return extractLabelValueEntries(Array.isArray(arr)?arr:[]);
-    }catch(e){ return []; }
-  }
-
-  async function readCustomLists(fileMap, key){
-    if(!key) return [];
-    try{
-      const txt = await fileMap[key].async('string');
-      const data = JSON.parse(txt);
-      const lists = data.custom_lists_v2 || data.lists || data;
-      const out = [];
-      if(Array.isArray(lists)){
-        lists.forEach(l=>{
-          const members = extractStringListEntries(l.string_list_data ? [l] : (l.entries||[]));
-          out.push({ name: l.name || l.title || 'Untitled list', members: members.length?members:extractLabelValueEntries(l.entries||[]) });
+      function extractStringListEntries (arr) {
+        // Handles arrays of {title, string_list_data:[{href,value,timestamp}]}
+        const out = [];
+        if (!Array.isArray(arr)) return out;
+        arr.forEach(item => {
+          const sld = item.string_list_data;
+          if (Array.isArray(sld)) {
+            sld.forEach(e => {
+              let username = e.value;
+              if (!username && e.href) {
+                const parts = e.href.split('/').filter(Boolean);
+                username = parts[ parts.length - 1 ];
+              }
+              if (!username && item.title) username = item.title;
+              if (username) {
+                const name = (item.title && item.title !== username) ? item.title : '';
+                out.push({ username: username, name: name, url: e.href || igUrl(username), timestamp: e.timestamp || 0 });
+              }
+            });
+          }
         });
+        return out;
       }
-      return out;
-    }catch(e){ return []; }
-  }
 
-  function computeComparisons(){
-    const notBack = [];
-    state.following.forEach((v,k)=>{ if(!state.followers.has(k)) notBack.push(v); });
-    state.notFollowingBack = notBack;
+      function extractLabelValueEntries (arr) {
+        // For pending/recent requests style: [{timestamp, label_values:[{label,value}], fbid}]
+        const out = [];
+        if (!Array.isArray(arr)) return out;
+        arr.forEach(item => {
+          let username = '';
+          let name = '';
+          if (Array.isArray(item.label_values)) {
+            const uField = item.label_values.find(l => (l.label || '').toLowerCase() === 'username');
+            const nField = item.label_values.find(l => (l.label || '').toLowerCase() === 'name');
+            if (uField) username = uField.value;
+            if (nField) name = nField.value || '';
+          }
+          if (!username && item.string_list_data) {
+            const sld = item.string_list_data;
+            if (sld[ 0 ]) username = sld[ 0 ].value || '';
+          }
+          if (username) {
+            out.push({ username: username, name: name, url: igUrl(username), timestamp: item.timestamp || 0 });
+          }
+        });
+        return out;
+      }
 
-    const youDont = [];
-    state.followers.forEach((v,k)=>{ if(!state.following.has(k)) youDont.push(v); });
-    state.youDontFollowBack = youDont;
-  }
+      function toMap (entries) {
+        const m = new Map();
+        entries.forEach(e => { if (!m.has(e.username)) m.set(e.username, e); });
+        return m;
+      }
 
-  /* ---------------- DASHBOARD ---------------- */
-  const cardsGrid = document.getElementById('cardsGrid');
-  const dashSub = document.getElementById('dashSub');
+      /* ---------------- ZIP PARSING ---------------- */
+      const fileInput = document.getElementById('fileInput');
+      const dropzone = document.getElementById('dropzone');
+      const browseBtn = document.getElementById('browseBtn');
+      const uploadProgress = document.getElementById('uploadProgress');
+      const progressFill = document.getElementById('progressFill');
+      const progressLabel = document.getElementById('progressLabel');
+      const errorBox = document.getElementById('errorBox');
 
-  const CARD_DEFS = [
-    {key:'followers', title:'Total Followers', icon:'<svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>', accent:true, get:()=>state.followers.size},
-    {key:'following', title:'Total Following', icon:'<svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>', accent:true, get:()=>state.following.size},
-    {key:'notFollowingBack', title:"Not Following You Back", icon:'<svg class="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21l7.78-7.55 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/><path d="M9 9.5 15 15"/><path d="M15 9.5 9 15"/></svg>', get:()=>state.notFollowingBack.length},
-    {key:'youDontFollowBack', title:"You Don't Follow Back", icon:'<svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>', get:()=>state.youDontFollowBack.length},
-    {key:'pending', title:'Pending Follow Requests', icon:'<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', get:()=>state.pending.length},
-    {key:'recentRequests', title:'Recent Follow Requests', icon:'<svg class="icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>', get:()=>state.recentRequests.length},
-    {key:'unfollowed', title:'Recently Unfollowed', icon:'<svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>', get:()=>state.unfollowed.length},
-    {key:'blocked', title:'Blocked Profiles', icon:'<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>', get:()=>state.blocked.length},
-    {key:'restricted', title:'Restricted Profiles', icon:'<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>', get:()=>state.restricted.length},
-    {key:'customLists', title:'Custom Lists', icon:'<svg class="icon" viewBox="0 0 24 24"><path d="M4 4h4l2 2h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>', get:()=>state.customLists.length},
-  ];
+      browseBtn.addEventListener('click', () => fileInput.click());
+      dropzone.addEventListener('click', (e) => { if (e.target !== browseBtn) fileInput.click(); });
+      dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+      dropzone.addEventListener('drop', e => {
+        e.preventDefault(); dropzone.classList.remove('drag');
+        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[ 0 ]);
+      });
+      fileInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[ 0 ]); });
 
-  function renderDashboard(){
-    dashSub.textContent = `${state.followers.size.toLocaleString()} followers • ${state.following.size.toLocaleString()} following • analyzed locally in your browser`;
-    cardsGrid.innerHTML = '';
-    CARD_DEFS.forEach(def=>{
-      const el = document.createElement('div');
-      el.className = 'card' + (def.accent?' accent':'');
-      const count = def.get();
-      el.innerHTML = `
+      function showError (msg) {
+        errorBox.textContent = msg; errorBox.classList.add('show');
+        uploadProgress.classList.remove('show');
+      }
+      function clearError () { errorBox.classList.remove('show'); errorBox.textContent = ''; }
+
+      function setProgress (pct, label) {
+        uploadProgress.classList.add('show');
+        progressFill.style.width = pct + '%';
+        progressLabel.textContent = label;
+      }
+
+      async function handleFile (file) {
+        clearError();
+        if (!file.name.toLowerCase().endsWith('.zip')) {
+          showError('Please upload a .zip file exported from Instagram (Meta "Download your information").');
+          return;
+        }
+        setProgress(8, 'Reading ZIP file…');
+        try {
+          const zip = await JSZip.loadAsync(file);
+          setProgress(25, 'Locating followers & following data…');
+
+          const fileMap = {};
+          zip.forEach((relPath, entry) => {
+            if (!entry.dir) fileMap[ relPath.toLowerCase() ] = entry;
+          });
+
+          function findFile (patternPart) {
+            const keys = Object.keys(fileMap).filter(k => k.includes(patternPart));
+            return keys;
+          }
+
+          // followers_*.json (merge all)
+          const followerKeys = findFile('followers_').filter(k => k.endsWith('.json'));
+          setProgress(35, 'Merging followers files…');
+          let followerEntries = [];
+          for (const k of followerKeys) {
+            const txt = await fileMap[ k ].async('string');
+            try {
+              const data = JSON.parse(txt);
+              followerEntries = followerEntries.concat(extractStringListEntries(Array.isArray(data) ? data : []));
+            } catch (e) { }
+          }
+          state.followers = toMap(followerEntries);
+
+          // following.json
+          setProgress(48, 'Reading following list…');
+          const followingKey = findFile('following.json')[ 0 ];
+          let followingEntries = [];
+          if (followingKey) {
+            const txt = await fileMap[ followingKey ].async('string');
+            try {
+              const data = JSON.parse(txt);
+              const arr = data.relationships_following || data;
+              followingEntries = extractStringListEntries(Array.isArray(arr) ? arr : []);
+            } catch (e) { }
+          }
+          state.following = toMap(followingEntries);
+
+          // pending_follow_requests.json
+          setProgress(58, 'Reading pending requests…');
+          state.pending = await readLabelValueList(fileMap, findFile('pending_follow_requests.json')[ 0 ]);
+
+          // recent_follow_requests.json
+          setProgress(66, 'Reading recent requests…');
+          state.recentRequests = await readLabelValueList(fileMap, findFile('recent_follow_requests.json')[ 0 ]);
+
+          // recently_unfollowed_profiles.json
+          setProgress(74, 'Reading recently unfollowed…');
+          state.unfollowed = await readLabelValueList(fileMap, findFile('recently_unfollowed_profiles.json')[ 0 ]);
+
+          // blocked_profiles.json
+          setProgress(80, 'Reading blocked profiles…');
+          state.blocked = await readLabelValueList(fileMap, findFile('blocked_profiles.json')[ 0 ]);
+
+          // restricted_profiles.json
+          setProgress(86, 'Reading restricted profiles…');
+          state.restricted = await readLabelValueList(fileMap, findFile('restricted_profiles.json')[ 0 ]);
+
+          // custom_lists.json
+          setProgress(92, 'Reading custom lists…');
+          state.customLists = await readCustomLists(fileMap, findFile('custom_lists.json')[ 0 ]);
+
+          if (state.followers.size === 0 && state.following.size === 0) {
+            showError('We could not find followers_*.json or following.json inside this ZIP. Please make sure you uploaded the correct Instagram data export.');
+            return;
+          }
+
+          setProgress(97, 'Computing comparisons…');
+          computeComparisons();
+
+          setProgress(100, 'Done!');
+          setTimeout(() => {
+            document.getElementById('uploadScreen').classList.add('hidden');
+            document.getElementById('dashboardScreen').classList.remove('hidden');
+            renderDashboard();
+          }, 300);
+
+        } catch (err) {
+          console.error(err);
+          showError('Something went wrong reading this ZIP file: ' + err.message);
+        }
+      }
+
+      async function readLabelValueList (fileMap, key) {
+        if (!key) return [];
+        try {
+          const txt = await fileMap[ key ].async('string');
+          const data = JSON.parse(txt);
+          const arr = Array.isArray(data) ? data :
+            (data.relationships_permanent_or_from_report || data.relationships_unfollowed_users ||
+              data.relationships_blocked_users || data.relationships_restricted_users ||
+              data.relationships_follow_requests_sent || Object.values(data)[ 0 ] || []);
+          return extractLabelValueEntries(Array.isArray(arr) ? arr : []);
+        } catch (e) { return []; }
+      }
+
+      async function readCustomLists (fileMap, key) {
+        if (!key) return [];
+        try {
+          const txt = await fileMap[ key ].async('string');
+          const data = JSON.parse(txt);
+          const lists = data.custom_lists_v2 || data.lists || data;
+          const out = [];
+          if (Array.isArray(lists)) {
+            lists.forEach(l => {
+              const members = extractStringListEntries(l.string_list_data ? [ l ] : (l.entries || []));
+              out.push({ name: l.name || l.title || 'Untitled list', members: members.length ? members : extractLabelValueEntries(l.entries || []) });
+            });
+          }
+          return out;
+        } catch (e) { return []; }
+      }
+
+      function computeComparisons () {
+        const notBack = [];
+        state.following.forEach((v, k) => { if (!state.followers.has(k)) notBack.push(v); });
+        state.notFollowingBack = notBack;
+
+        const youDont = [];
+        state.followers.forEach((v, k) => { if (!state.following.has(k)) youDont.push(v); });
+        state.youDontFollowBack = youDont;
+
+        const mutuals = [];
+        state.following.forEach((v, k) => { if (state.followers.has(k)) mutuals.push(v); });
+        state.mutualFollowers = mutuals;
+      }
+
+      /* ---------------- DASHBOARD ---------------- */
+      const cardsGrid = document.getElementById('cardsGrid');
+      const dashSub = document.getElementById('dashSub');
+
+      const CARD_DEFS = [
+        { key: 'followers', title: 'Total Followers', icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>', accent: true, get: () => state.followers.size },
+        { key: 'following', title: 'Total Following', icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>', accent: true, get: () => state.following.size },
+        { key: 'mutualFollowers', title: 'Mutual Followers', icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="m17 11 2 2 4-4"/></svg>', accent: true, get: () => state.mutualFollowers.length },
+        { key: 'notFollowingBack', title: "Not Following You Back", icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21l7.78-7.55 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/><path d="M9 9.5 15 15"/><path d="M15 9.5 9 15"/></svg>', get: () => state.notFollowingBack.length },
+        { key: 'youDontFollowBack', title: "You don’t Follow Back", icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>', get: () => state.youDontFollowBack.length },
+        { key: 'pending', title: 'Pending Follow Requests', icon: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', get: () => state.pending.length },
+        { key: 'recentRequests', title: 'Recent Follow Requests', icon: '<svg class="icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>', get: () => state.recentRequests.length },
+        { key: 'unfollowed', title: 'Recently Unfollowed', icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>', get: () => state.unfollowed.length },
+        { key: 'blocked', title: 'Blocked Profiles', icon: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>', get: () => state.blocked.length },
+        { key: 'restricted', title: 'Restricted Profiles', icon: '<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>', get: () => state.restricted.length },
+        { key: 'customLists', title: 'Custom Lists', icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M4 4h4l2 2h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>', get: () => state.customLists.length },
+      ];
+
+      function renderDashboard () {
+        dashSub.textContent = `${state.followers.size.toLocaleString()} followers • ${state.following.size.toLocaleString()} following • analyzed locally in your browser`;
+        cardsGrid.innerHTML = '';
+        CARD_DEFS.forEach(def => {
+          const el = document.createElement('div');
+          el.className = 'card' + (def.accent ? ' accent' : '');
+          const count = def.get();
+          el.innerHTML = `
         <div class="card-top">
           <div class="c-icon">${def.icon}</div>
         </div>
         <div class="c-count">${count.toLocaleString()}</div>
         <div class="c-title">${def.title}</div>
       `;
-      el.addEventListener('click', ()=> openDetail(def.key, def.title));
-      cardsGrid.appendChild(el);
-    });
-  }
+          el.addEventListener('click', () => openDetail(def.key, def.title));
+          cardsGrid.appendChild(el);
+        });
+      }
 
-  document.getElementById('newUploadBtn').addEventListener('click', ()=>{
-    document.getElementById('dashboardScreen').classList.add('hidden');
-    document.getElementById('detailScreen').classList.add('hidden');
-    document.getElementById('uploadScreen').classList.remove('hidden');
-    fileInput.value = '';
-    uploadProgress.classList.remove('show');
-    clearError();
-  });
+      document.getElementById('newUploadBtn').addEventListener('click', () => {
+        document.getElementById('dashboardScreen').classList.add('hidden');
+        document.getElementById('detailScreen').classList.add('hidden');
+        document.getElementById('uploadScreen').classList.remove('hidden');
+        fileInput.value = '';
+        uploadProgress.classList.remove('show');
+        clearError();
+      });
 
-  /* ---------------- DETAIL VIEW ---------------- */
-  const detailTitle = document.getElementById('detailTitle');
-  const detailSub = document.getElementById('detailSub');
-  const tableBody = document.getElementById('tableBody');
-  const emptyState = document.getElementById('emptyState');
-  const pagination = document.getElementById('pagination');
-  const searchInput = document.getElementById('searchInput');
-  const sortSelect = document.getElementById('sortSelect');
-  const selectedBar = document.getElementById('selectedBar');
-  const selCount = document.getElementById('selCount');
-  const headerCheckbox = document.getElementById('headerCheckbox');
+      /* ---------------- DETAIL VIEW ---------------- */
+      const detailTitle = document.getElementById('detailTitle');
+      const detailSub = document.getElementById('detailSub');
+      const tableBody = document.getElementById('tableBody');
+      const emptyState = document.getElementById('emptyState');
+      const pagination = document.getElementById('pagination');
+      const searchInput = document.getElementById('searchInput');
+      const sortSelect = document.getElementById('sortSelect');
+      const selectedBar = document.getElementById('selectedBar');
+      const selCount = document.getElementById('selCount');
+      const headerCheckbox = document.getElementById('headerCheckbox');
 
-  function getListForKey(key){
-    switch(key){
-      case 'followers': return Array.from(state.followers.values());
-      case 'following': return Array.from(state.following.values());
-      case 'notFollowingBack': return state.notFollowingBack;
-      case 'youDontFollowBack': return state.youDontFollowBack;
-      case 'pending': return state.pending;
-      case 'recentRequests': return state.recentRequests;
-      case 'unfollowed': return state.unfollowed;
-      case 'blocked': return state.blocked;
-      case 'restricted': return state.restricted;
-      default: return [];
-    }
-  }
+      function getListForKey (key) {
+        switch (key) {
+          case 'followers': return Array.from(state.followers.values());
+          case 'following': return Array.from(state.following.values());
+          case 'mutualFollowers': return state.mutualFollowers;
+          case 'notFollowingBack': return state.notFollowingBack;
+          case 'youDontFollowBack': return state.youDontFollowBack;
+          case 'pending': return state.pending;
+          case 'recentRequests': return state.recentRequests;
+          case 'unfollowed': return state.unfollowed;
+          case 'blocked': return state.blocked;
+          case 'restricted': return state.restricted;
+          default: return [];
+        }
+      }
 
-  function openDetail(key, title, listOverride){
-    currentView = key;
-    currentList = listOverride || getListForKey(key);
-    selected = new Set();
-    searchTerm = ''; searchInput.value='';
-    sortMode = 'newest'; sortSelect.value='newest';
-    page = 1;
-    detailTitle.textContent = title;
-    detailSub.textContent = `${currentList.length.toLocaleString()} profiles`;
-    document.getElementById('dashboardScreen').classList.add('hidden');
-    document.getElementById('detailScreen').classList.remove('hidden');
-    applyFilterSort();
-  }
+      function openDetail (key, title, listOverride) {
+        currentView = key;
+        currentList = listOverride || getListForKey(key);
+        selected = new Set();
+        searchTerm = ''; searchInput.value = '';
+        sortMode = 'newest'; sortSelect.value = 'newest';
+        page = 1;
+        detailTitle.textContent = title;
+        detailSub.textContent = `${currentList.length.toLocaleString()} profiles`;
+        document.getElementById('dashboardScreen').classList.add('hidden');
+        document.getElementById('detailScreen').classList.remove('hidden');
+        applyFilterSort();
+      }
 
-  document.getElementById('backBtn').addEventListener('click', ()=>{
-    document.getElementById('detailScreen').classList.add('hidden');
-    document.getElementById('dashboardScreen').classList.remove('hidden');
-    renderDashboard();
-  });
+      document.getElementById('backBtn').addEventListener('click', () => {
+        document.getElementById('detailScreen').classList.add('hidden');
+        document.getElementById('dashboardScreen').classList.remove('hidden');
+        renderDashboard();
+      });
 
-  // custom lists card opens a chooser (rendered inline as a special list)
-  cardsGrid.addEventListener('click', ()=>{}); // no-op placeholder (handled per-card above)
+      // custom lists card opens a chooser (rendered inline as a special list)
+      cardsGrid.addEventListener('click', () => { }); // no-op placeholder (handled per-card above)
 
-  function customListsIndexView(){
-    detailTitle.textContent = 'Custom Lists';
-    detailSub.textContent = state.customLists.length + ' lists';
-    tableBody.innerHTML='';
-    state.customLists.forEach((l,i)=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td></td><td>${i+1}</td><td colspan="3" style="cursor:pointer" >
+      function customListsIndexView () {
+        detailTitle.textContent = 'Custom Lists';
+        detailSub.textContent = state.customLists.length + ' lists';
+        tableBody.innerHTML = '';
+        state.customLists.forEach((l, i) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td></td><td>${i + 1}</td><td colspan="3" style="cursor:pointer" >
         <b>${escapeHtml(l.name)}</b> <span style="color:var(--text-dim)">— ${l.members.length} members</span>
       </td>`;
-      tr.addEventListener('click', ()=> openDetail('customList_'+i, l.name, l.members));
-      tableBody.appendChild(tr);
-    });
-    pagination.innerHTML = '';
-    emptyState.classList.toggle('hidden', state.customLists.length>0);
-  }
+          tr.addEventListener('click', () => openDetail('customList_' + i, l.name, l.members));
+          tableBody.appendChild(tr);
+        });
+        pagination.innerHTML = '';
+        emptyState.classList.toggle('hidden', state.customLists.length > 0);
+      }
 
-  // Override for customLists card click (redefine dashboard card handler)
-  CARD_DEFS.find(d=>d.key==='customLists').custom = true;
+      // Override for customLists card click (redefine dashboard card handler)
+      CARD_DEFS.find(d => d.key === 'customLists').custom = true;
 
-  function applyFilterSort(){
-    let list = currentList.slice();
-    if(searchTerm){
-      const t = searchTerm.toLowerCase();
-      list = list.filter(u => u.username.toLowerCase().includes(t));
-    }
-    switch(sortMode){
-      case 'az': list.sort((a,b)=>a.username.localeCompare(b.username)); break;
-      case 'za': list.sort((a,b)=>b.username.localeCompare(a.username)); break;
-      case 'newest': list.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0)); break;
-      case 'oldest': list.sort((a,b)=>(a.timestamp||0)-(b.timestamp||0)); break;
-    }
-    filtered = list;
-    page = 1;
-    renderTable();
-  }
+      function applyFilterSort () {
+        let list = currentList.slice();
+        if (searchTerm) {
+          const t = searchTerm.toLowerCase();
+          list = list.filter(u => u.username.toLowerCase().includes(t));
+        }
+        switch (sortMode) {
+          case 'az': list.sort((a, b) => a.username.localeCompare(b.username)); break;
+          case 'za': list.sort((a, b) => b.username.localeCompare(a.username)); break;
+          case 'newest': list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)); break;
+          case 'oldest': list.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)); break;
+        }
+        filtered = list;
+        page = 1;
+        renderTable();
+      }
 
-  function renderTable(){
-    const total = filtered.length;
-    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-    if(page > totalPages) page = totalPages;
-    const start = (page-1)*PAGE_SIZE;
-    const pageItems = filtered.slice(start, start+PAGE_SIZE);
+      function renderTable () {
+        const total = filtered.length;
+        const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+        if (page > totalPages) page = totalPages;
+        const start = (page - 1) * PAGE_SIZE;
+        const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
-    emptyState.classList.toggle('hidden', total > 0);
-    tableBody.innerHTML = '';
+        emptyState.classList.toggle('hidden', total > 0);
+        tableBody.innerHTML = '';
 
-    pageItems.forEach((u, idx)=>{
-      const globalIdx = start + idx + 1;
-      const tr = document.createElement('tr');
-      const checked = selected.has(u.username) ? 'checked' : '';
-      tr.innerHTML = `
+        pageItems.forEach((u, idx) => {
+          const globalIdx = start + idx + 1;
+          const tr = document.createElement('tr');
+          const checked = selected.has(u.username) ? 'checked' : '';
+          tr.innerHTML = `
         <td><input type="checkbox" data-u="${escapeHtml(u.username)}" ${checked}></td>
         <td class="row-num">${globalIdx}</td>
         <td>
@@ -845,189 +2293,830 @@ footer.appfooter{text-align:center;color:var(--text-dim);font-size:12px;padding:
             <div class="avatar">${initials(u.username)}</div>
             <div>
               ${u.name ? `<div style="font-weight:600">${escapeHtml(u.name)}</div>` : ''}
-              <a class="uname" style="${u.name?'font-weight:400;color:var(--text-dim);font-size:12.5px':''}" href="${u.url || igUrl(u.username)}" target="_blank" rel="noopener">@${escapeHtml(u.username)}</a>
+              <a class="uname" style="${u.name ? 'font-weight:400;color:var(--text-dim);font-size:12.5px' : ''}" href="${u.url || igUrl(u.username)}" target="_blank" rel="noopener">@${escapeHtml(u.username)}</a>
             </div>
           </div>
         </td>
         <td class="date-cell">${fmtDate(u.timestamp)}</td>
         <td><a class="btn sm open-profile-btn" data-u="${escapeHtml(u.username)}" href="${u.url || igUrl(u.username)}" target="_blank" rel="noopener">Open <svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg></a></td>
       `;
-      tableBody.appendChild(tr);
-    });
+          tableBody.appendChild(tr);
+        });
 
-    tableBody.querySelectorAll('.open-profile-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const uname = btn.getAttribute('data-u');
-        selected.add(uname);
-        const cb = tableBody.querySelector(`input[type=checkbox][data-u="${CSS.escape(uname)}"]`);
-        if(cb) cb.checked = true;
-        updateSelectedBar();
-      });
-    });
+        tableBody.querySelectorAll('.open-profile-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const uname = btn.getAttribute('data-u');
+            selected.add(uname);
+            const cb = tableBody.querySelector(`input[type=checkbox][data-u="${CSS.escape(uname)}"]`);
+            if (cb) cb.checked = true;
+            updateSelectedBar();
+          });
+        });
 
-    tableBody.querySelectorAll('input[type=checkbox]').forEach(cb=>{
-      cb.addEventListener('change', ()=>{
-        const u = cb.getAttribute('data-u');
-        if(cb.checked) selected.add(u); else selected.delete(u);
-        updateSelectedBar();
-      });
-    });
+        tableBody.querySelectorAll('input[type=checkbox]').forEach(cb => {
+          cb.addEventListener('change', () => {
+            const u = cb.getAttribute('data-u');
+            if (cb.checked) selected.add(u); else selected.delete(u);
+            updateSelectedBar();
+          });
+        });
 
-    pagination.innerHTML = `
-      <div>${total.toLocaleString()} results ${searchTerm?`(filtered)`:''}</div>
+        pagination.innerHTML = `
+      <div>${total.toLocaleString()} results ${searchTerm ? `(filtered)` : ''}</div>
       <div class="pg-btns">
-        <button class="btn sm" id="prevPg" ${page<=1?'disabled':''}><svg class="icon" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Prev</button>
+        <button class="btn sm" id="prevPg" ${page <= 1 ? 'disabled' : ''}><svg class="icon" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Prev</button>
         <span style="align-self:center">Page ${page} / ${totalPages}</span>
-        <button class="btn sm" id="nextPg" ${page>=totalPages?'disabled':''}>Next <svg class="icon" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+        <button class="btn sm" id="nextPg" ${page >= totalPages ? 'disabled' : ''}>Next <svg class="icon" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
       </div>
     `;
-    const prevBtn = document.getElementById('prevPg');
-    const nextBtn = document.getElementById('nextPg');
-    if(prevBtn) prevBtn.addEventListener('click', ()=>{ page--; renderTable(); });
-    if(nextBtn) nextBtn.addEventListener('click', ()=>{ page++; renderTable(); });
+        const prevBtn = document.getElementById('prevPg');
+        const nextBtn = document.getElementById('nextPg');
+        if (prevBtn) prevBtn.addEventListener('click', () => { page--; renderTable(); });
+        if (nextBtn) nextBtn.addEventListener('click', () => { page++; renderTable(); });
 
-    updateSelectedBar();
-    headerCheckbox.checked = pageItems.length>0 && pageItems.every(u=>selected.has(u.username));
-  }
+        updateSelectedBar();
+        headerCheckbox.checked = pageItems.length > 0 && pageItems.every(u => selected.has(u.username));
+      }
 
-  function updateSelectedBar(){
-    selCount.textContent = selected.size;
-    selectedBar.classList.toggle('show', selected.size>0);
-  }
+      function updateSelectedBar () {
+        selCount.textContent = selected.size;
+        selectedBar.classList.toggle('show', selected.size > 0);
+      }
 
-  searchInput.addEventListener('input', e=>{ searchTerm = e.target.value; applyFilterSort(); });
-  sortSelect.addEventListener('change', e=>{ sortMode = e.target.value; applyFilterSort(); });
+      searchInput.addEventListener('input', e => { searchTerm = e.target.value; applyFilterSort(); });
+      sortSelect.addEventListener('change', e => { sortMode = e.target.value; applyFilterSort(); });
 
-  document.querySelectorAll('th[data-sort]').forEach(th=>{
-    th.addEventListener('click', ()=>{
-      const field = th.getAttribute('data-sort');
-      if(field==='username') sortMode = sortMode==='az' ? 'za' : 'az';
-      if(field==='date') sortMode = sortMode==='newest' ? 'oldest' : 'newest';
-      sortSelect.value = sortMode;
-      applyFilterSort();
-    });
-  });
+      document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+          const field = th.getAttribute('data-sort');
+          if (field === 'username') sortMode = sortMode === 'az' ? 'za' : 'az';
+          if (field === 'date') sortMode = sortMode === 'newest' ? 'oldest' : 'newest';
+          sortSelect.value = sortMode;
+          applyFilterSort();
+        });
+      });
 
-  headerCheckbox.addEventListener('change', ()=>{
-    const start = (page-1)*PAGE_SIZE;
-    const pageItems = filtered.slice(start, start+PAGE_SIZE);
-    if(headerCheckbox.checked){ pageItems.forEach(u=>selected.add(u.username)); }
-    else { pageItems.forEach(u=>selected.delete(u.username)); }
-    renderTable();
-  });
+      headerCheckbox.addEventListener('change', () => {
+        const start = (page - 1) * PAGE_SIZE;
+        const pageItems = filtered.slice(start, start + PAGE_SIZE);
+        if (headerCheckbox.checked) { pageItems.forEach(u => selected.add(u.username)); }
+        else { pageItems.forEach(u => selected.delete(u.username)); }
+        renderTable();
+      });
 
-  document.getElementById('selectAllBtn').addEventListener('click', ()=>{
-    filtered.forEach(u=>selected.add(u.username));
-    renderTable();
-    toast(`Selected all ${filtered.length} profiles`);
-  });
-  document.getElementById('unselectAllBtn').addEventListener('click', ()=>{
-    selected.clear(); renderTable();
-  });
+      document.getElementById('selectAllBtn').addEventListener('click', () => {
+        filtered.forEach(u => selected.add(u.username));
+        renderTable();
+        toast(`Selected all ${filtered.length} profiles`);
+      });
+      document.getElementById('unselectAllBtn').addEventListener('click', () => {
+        selected.clear(); renderTable();
+      });
 
-  function copyToClipboard(text){
-    navigator.clipboard.writeText(text).then(()=> toast('Copied to clipboard')).catch(()=> toast('Could not copy'));
-  }
+      function copyToClipboard (text) {
+        navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard')).catch(() => toast('Could not copy'));
+      }
 
-  document.getElementById('copyUsernamesBtn').addEventListener('click', ()=>{
-    const names = currentList.filter(u=>selected.has(u.username)).map(u=>u.username).join('\n');
-    copyToClipboard(names);
-  });
-  document.getElementById('copyUrlsBtn').addEventListener('click', ()=>{
-    const urls = currentList.filter(u=>selected.has(u.username)).map(u=>u.url || igUrl(u.username)).join('\n');
-    copyToClipboard(urls);
-  });
+      document.getElementById('copyUsernamesBtn').addEventListener('click', () => {
+        const names = currentList.filter(u => selected.has(u.username)).map(u => u.username).join('\n');
+        copyToClipboard(names);
+      });
+      document.getElementById('copyHandlesBtn').addEventListener('click', () => {
+        const list = currentList.filter(u => selected.has(u.username)).map(u => `@${u.username}`);
+        if (list.length > 0) {
+          copyToClipboard(list.join(' '));
+          toast(`Copied ${list.length} @handles`);
+        } else {
+          toast('Select at least 1 profile first');
+        }
+      });
+      document.getElementById('copyAllHandlesBtn').addEventListener('click', () => {
+        const list = filtered.map(u => `@${u.username}`).join(' ');
+        if (filtered.length > 0) {
+          copyToClipboard(list);
+          toast(`Copied ${filtered.length} @handles`);
+        } else {
+          toast('No profiles to copy');
+        }
+      });
+      document.getElementById('copyUrlsBtn').addEventListener('click', () => {
+        const urls = currentList.filter(u => selected.has(u.username)).map(u => u.url || igUrl(u.username)).join('\n');
+        copyToClipboard(urls);
+      });
 
-  function toCsv(list){
-    const rows = [['name','username','url','date']];
-    list.forEach(u=> rows.push([u.name||'', u.username, u.url||igUrl(u.username), fmtDate(u.timestamp)]));
-    return rows.map(r => r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  }
-  function downloadBlob(content, filename, type){
-    const blob = new Blob([content], {type});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-  }
+      function toCsv (list) {
+        const rows = [ [ 'name', 'username', 'url', 'date' ] ];
+        list.forEach(u => rows.push([ u.name || '', u.username, u.url || igUrl(u.username), fmtDate(u.timestamp) ]));
+        return rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+      }
+      function downloadBlob (content, filename, type) {
+        const blob = new Blob([ content ], { type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+      }
 
-  document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
-    downloadBlob(toCsv(filtered), `${currentView||'list'}.csv`, 'text/csv');
-    toast('CSV exported');
-  });
-  document.getElementById('exportJsonBtn').addEventListener('click', ()=>{
-    downloadBlob(JSON.stringify(filtered, null, 2), `${currentView||'list'}.json`, 'application/json');
-    toast('JSON exported');
-  });
-  document.getElementById('exportExcelBtn').addEventListener('click', ()=>{
-    // Simple Excel-compatible HTML table export (.xls)
-    let html = '<table><tr><th>Name</th><th>Username</th><th>URL</th><th>Date</th></tr>';
-    filtered.forEach(u=>{ html += `<tr><td>${u.name||''}</td><td>${u.username}</td><td>${u.url||igUrl(u.username)}</td><td>${fmtDate(u.timestamp)}</td></tr>`; });
-    html += '</table>';
-    downloadBlob(html, `${currentView||'list'}.xls`, 'application/vnd.ms-excel');
-    toast('Excel file exported');
-  });
-  document.getElementById('exportSelectedBtn').addEventListener('click', ()=>{
-    const list = currentList.filter(u=>selected.has(u.username));
-    downloadBlob(toCsv(list), `${currentView||'list'}-selected.csv`, 'text/csv');
-    toast('Selected profiles exported');
-  });
+      document.getElementById('exportCsvBtn').addEventListener('click', () => {
+        downloadBlob(toCsv(filtered), `${currentView || 'list'}.csv`, 'text/csv');
+        toast('CSV exported');
+      });
+      document.getElementById('exportJsonBtn').addEventListener('click', () => {
+        downloadBlob(JSON.stringify(filtered, null, 2), `${currentView || 'list'}.json`, 'application/json');
+        toast('JSON exported');
+      });
+      document.getElementById('exportExcelBtn').addEventListener('click', () => {
+        // Simple Excel-compatible HTML table export (.xls)
+        let html = '<table><tr><th>Name</th><th>Username</th><th>URL</th><th>Date</th></tr>';
+        filtered.forEach(u => { html += `<tr><td>${u.name || ''}</td><td>${u.username}</td><td>${u.url || igUrl(u.username)}</td><td>${fmtDate(u.timestamp)}</td></tr>`; });
+        html += '</table>';
+        downloadBlob(html, `${currentView || 'list'}.xls`, 'application/vnd.ms-excel');
+        toast('Excel file exported');
+      });
+      document.getElementById('exportSelectedBtn').addEventListener('click', () => {
+        const list = currentList.filter(u => selected.has(u.username));
+        downloadBlob(toCsv(list), `${currentView || 'list'}-selected.csv`, 'text/csv');
+        toast('Selected profiles exported');
+      });
 
-  /* ---------------- OPEN ALL ---------------- */
-  const confirmModal = document.getElementById('confirmModal');
-  const confirmModalText = document.getElementById('confirmModalText');
-  document.getElementById('openAllBtn').addEventListener('click', ()=>{
-    const list = selected.size>0 ? currentList.filter(u=>selected.has(u.username)) : filtered;
-    if(list.length===0){ toast('No profiles to open'); return; }
-    confirmModalText.textContent = `You are about to open ${list.length} Instagram profile${list.length>1?'s':''} in new tabs. Your browser may block popups — please allow them if prompted. Continue?`;
-    confirmModal.classList.add('show');
-    confirmModal.dataset.pending = 'true';
-    confirmModal._list = list;
-  });
-  document.getElementById('modalCancel').addEventListener('click', ()=> confirmModal.classList.remove('show'));
-  document.getElementById('modalConfirm').addEventListener('click', ()=>{
-    confirmModal.classList.remove('show');
-    const list = confirmModal._list || [];
-    let i = 0;
-    const BATCH = 10;
-    const interval = setInterval(()=>{
-      const batch = list.slice(i, i+BATCH);
-      batch.forEach(u => window.open(u.url || igUrl(u.username), '_blank'));
-      i += BATCH;
-      if(i >= list.length) clearInterval(interval);
-    }, 1000);
-    toast(`Opening ${list.length} profiles…`);
-  });
+      /* ---------------- OPEN ALL ---------------- */
+      const confirmModal = document.getElementById('confirmModal');
+      const confirmModalText = document.getElementById('confirmModalText');
+      document.getElementById('openAllBtn').addEventListener('click', () => {
+        const list = selected.size > 0 ? currentList.filter(u => selected.has(u.username)) : filtered;
+        if (list.length === 0) { toast('No profiles to open'); return; }
+        confirmModalText.textContent = `You are about to open ${list.length} Instagram profile${list.length > 1 ? 's' : ''} in new tabs. Your browser may block popups — please allow them if prompted. Continue?`;
+        confirmModal.classList.add('show');
+        confirmModal.dataset.pending = 'true';
+        confirmModal._list = list;
+      });
+      document.getElementById('modalCancel').addEventListener('click', () => confirmModal.classList.remove('show'));
+      document.getElementById('modalConfirm').addEventListener('click', () => {
+        confirmModal.classList.remove('show');
+        const list = confirmModal._list || [];
+        let i = 0;
+        const BATCH = 10;
+        const interval = setInterval(() => {
+          const batch = list.slice(i, i + BATCH);
+          batch.forEach(u => window.open(u.url || igUrl(u.username), '_blank'));
+          i += BATCH;
+          if (i >= list.length) clearInterval(interval);
+        }, 1000);
+        toast(`Opening ${list.length} profiles…`);
+      });
 
-  /* ---------------- CUSTOM CARD OVERRIDE ---------------- */
-  const originalRenderDashboard = renderDashboard;
-  renderDashboard = function(){
-    dashSub.textContent = `${state.followers.size.toLocaleString()} followers • ${state.following.size.toLocaleString()} following • analyzed locally in your browser`;
-    cardsGrid.innerHTML = '';
-    CARD_DEFS.forEach(def=>{
-      const el = document.createElement('div');
-      el.className = 'card' + (def.accent?' accent':'');
-      const count = def.get();
-      el.innerHTML = `
+      /* ---------------- CUSTOM CARD OVERRIDE ---------------- */
+      const originalRenderDashboard = renderDashboard;
+      renderDashboard = function () {
+        dashSub.textContent = `${state.followers.size.toLocaleString()} followers • ${state.following.size.toLocaleString()} following • analyzed locally in your browser`;
+        cardsGrid.innerHTML = '';
+        CARD_DEFS.forEach(def => {
+          const el = document.createElement('div');
+          el.className = 'card' + (def.accent ? ' accent' : '');
+          const count = def.get();
+          el.innerHTML = `
         <div class="card-top"><div class="c-icon">${def.icon}</div></div>
         <div class="c-count">${count.toLocaleString()}</div>
         <div class="c-title">${def.title}</div>
       `;
-      el.addEventListener('click', ()=>{
-        if(def.key==='customLists'){
-          document.getElementById('dashboardScreen').classList.add('hidden');
-          document.getElementById('detailScreen').classList.remove('hidden');
-          customListsIndexView();
-        } else {
-          openDetail(def.key, def.title);
-        }
-      });
-      cardsGrid.appendChild(el);
-    });
-  };
+          el.addEventListener('click', () => {
+            if (def.key === 'customLists') {
+              document.getElementById('dashboardScreen').classList.add('hidden');
+              document.getElementById('detailScreen').classList.remove('hidden');
+              customListsIndexView();
+            } else {
+              openDetail(def.key, def.title);
+            }
+          });
+          cardsGrid.appendChild(el);
+        });
+        renderStats();
+      };
 
-})();
-</script>
+      /* ===============================================================
+         STATS / ANALYTICS ENGINE
+      =============================================================== */
+      function renderStats () {
+        renderRatioCards();
+        renderDonut();
+        renderBarChart();
+        renderFunnel();
+        renderInsights();
+      }
+
+      /* --- Ratio Cards --- */
+      function renderRatioCards () {
+        const row = document.getElementById('statRatioRow');
+        if (!row) return;
+        const F = state.followers.size;
+        const FG = state.following.size;
+        const MB = state.mutualFollowers.length;
+        const NF = state.notFollowingBack.length;
+
+        const followBackRate = FG > 0 ? Math.round((MB / FG) * 100) : 0;
+        const ghostRate = F > 0 ? Math.round(((F - MB) / F) * 100) : 0;
+        const ratio = FG > 0 ? (F / FG).toFixed(2) : '∞';
+        const engagement = F > 0 ? Math.round(((MB) / F) * 100) : 0;
+
+        const cards = [
+          { label: 'Follow-Back Rate', value: followBackRate + '%', sub: 'of people you follow, follow back', bar: followBackRate, color: 'var(--accent)' },
+          { label: 'Ghost Follower %', value: ghostRate + '%', sub: 'of followers are one-sided', bar: ghostRate, color: 'var(--accent2)' },
+          { label: 'Follower Ratio', value: ratio + '×', sub: `followers per person you follow`, bar: Math.min(100, parseFloat(ratio) * 20 || 0), color: '#10b981' },
+          { label: 'Mutual Rate', value: engagement + '%', sub: 'of your followers are mutual', bar: engagement, color: '#f59e0b' },
+        ];
+
+        row.innerHTML = '';
+        cards.forEach(c => {
+          const d = document.createElement('div');
+          d.className = 'stat-ratio-card';
+          d.innerHTML = `
+        <div class="src-label">${c.label}</div>
+        <div class="src-value">${c.value}</div>
+        <div class="src-sub">${c.sub}</div>
+        <div class="src-bar"><div class="src-bar-fill" style="width:0%;background:${c.color}" data-target="${Math.min(100, c.bar || 0)}"></div></div>
+      `;
+          row.appendChild(d);
+        });
+        // Animate bars after paint
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          row.querySelectorAll('.src-bar-fill').forEach(el => {
+            el.style.width = el.dataset.target + '%';
+          });
+        }));
+      }
+
+      /* --- Donut Chart --- */
+      function renderDonut () {
+        const svg = document.getElementById('donutSvg');
+        const legend = document.getElementById('donutLegend');
+        const centerVal = document.getElementById('donutCenterVal');
+        if (!svg) return;
+
+        const F = state.followers.size;
+        const FG = state.following.size;
+        const MB = state.mutualFollowers.length;
+        const NF = state.notFollowingBack.length;
+        const YD = state.youDontFollowBack.length;
+
+        const total = F + FG; // use sum for visual proportion
+        centerVal.textContent = (F + FG).toLocaleString();
+
+        const segments = [
+          { label: 'Followers', value: F, color: '#a78bfa' },
+          { label: 'Following', value: FG, color: '#f472b6' },
+        ];
+
+        const r = 15.9155; // circumference = 2πr = 100 at r=15.9155
+        const cx = 18, cy = 18, radius = 15.9155;
+        const circumference = 2 * Math.PI * radius; // ~100
+
+        let svgMarkup = '';
+        // background circle
+        svgMarkup += `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="var(--border)" stroke-width="3.5"/>`;
+
+        const grandTotal = segments.reduce((s, x) => s + x.value, 0) || 1;
+        let offset = 0;
+        segments.forEach(seg => {
+          const pct = seg.value / grandTotal;
+          const dash = pct * circumference;
+          const gap = circumference - dash;
+          svgMarkup += `<circle
+        cx="${cx}" cy="${cy}" r="${radius}"
+        fill="none" stroke="${seg.color}" stroke-width="3.5"
+        stroke-dasharray="${dash.toFixed(3)} ${gap.toFixed(3)}"
+        stroke-dashoffset="${(circumference * (1 - offset)).toFixed(3)}"
+        stroke-linecap="butt"
+        style="transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)"
+      />`;
+          offset += pct;
+        });
+        svg.innerHTML = svgMarkup;
+
+        // Legend
+        legend.innerHTML = '';
+        segments.forEach(seg => {
+          const pct = grandTotal > 0 ? Math.round(seg.value / grandTotal * 100) : 0;
+          const item = document.createElement('div');
+          item.className = 'dl-item';
+          item.innerHTML = `
+        <div class="dl-dot" style="background:${seg.color}"></div>
+        <div>
+          <div style="font-weight:700">${seg.label}</div>
+          <div class="dl-name">${seg.value.toLocaleString()} (${pct}%)</div>
+        </div>
+      `;
+          legend.appendChild(item);
+        });
+        // add mutuals too
+        const mPct = F > 0 ? Math.round(MB / F * 100) : 0;
+        const mItem = document.createElement('div');
+        mItem.className = 'dl-item';
+        mItem.innerHTML = `
+      <div class="dl-dot" style="background:#10b981"></div>
+      <div>
+        <div style="font-weight:700">Mutuals</div>
+        <div class="dl-name">${MB.toLocaleString()} (${mPct}% of followers)</div>
+      </div>
+    `;
+        legend.appendChild(mItem);
+      }
+
+      /* --- Bar Chart: monthly follower activity --- */
+      function renderBarChart () {
+        const wrap = document.getElementById('barChartWrap');
+        if (!wrap) return;
+
+        // Collect all timestamps from followers array
+        const allEntries = Array.from(state.followers.values()).filter(u => u.timestamp && u.timestamp > 0);
+        if (allEntries.length === 0) {
+          wrap.innerHTML = '<div class="bar-chart-empty">No timestamp data available in your export.</div>';
+          return;
+        }
+
+        // Group by year-month
+        const monthMap = {};
+        allEntries.forEach(u => {
+          const d = new Date(u.timestamp * 1000);
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+          monthMap[ key ] = (monthMap[ key ] || 0) + 1;
+        });
+
+        const keys = Object.keys(monthMap).sort();
+        // Take last 18 months max
+        const shown = keys.slice(-18);
+        const vals = shown.map(k => monthMap[ k ]);
+        const maxV = Math.max(...vals) || 1;
+
+        wrap.innerHTML = '';
+        shown.forEach((k, i) => {
+          const col = document.createElement('div');
+          col.className = 'bar-col';
+          const heightPct = Math.max(4, Math.round((vals[ i ] / maxV) * 100));
+          const [ yr, mo ] = k.split('-');
+          const moLabel = new Date(+yr, +mo - 1, 1).toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+          col.innerHTML = `
+            <div class="bar-num" id="bnum-${i}">${vals[ i ]}</div>
+            <div class="bar-rect" title="${vals[ i ]} followers in ${moLabel}" style="height:0px" data-h="${heightPct}"></div>
+            <div class="bar-lbl">${moLabel}</div>
+          `;
+          wrap.appendChild(col);
+        });
+
+        // Animate bars then fade in numbers
+        const maxBarHeight = 130; // px
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          wrap.querySelectorAll('.bar-rect').forEach(el => {
+            const pct = parseInt(el.dataset.h);
+            el.style.height = Math.round((pct / 100) * maxBarHeight) + 'px';
+            el.style.transition = 'height 0.9s cubic-bezier(.4,0,.2,1)';
+          });
+          // Fade in numbers after bars animate
+          wrap.querySelectorAll('.bar-num').forEach(el => {
+            el.style.opacity = '1';
+          });
+        }));
+      }
+
+      /* --- Funnel Cards --- */
+      function renderFunnel () {
+        const row = document.getElementById('funnelRow');
+        if (!row) return;
+        const F = state.followers.size;
+        const FG = state.following.size;
+        const MB = state.mutualFollowers.length;
+        const NF = state.notFollowingBack.length;
+        const YD = state.youDontFollowBack.length;
+        const PD = state.pending.length;
+        const BL = state.blocked.length;
+
+        const items = [
+          {
+            icon: `<svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+            bg: 'rgba(167,139,250,0.15)', color: '#a78bfa',
+            label: 'Total Followers', num: F,
+            pct: 100, note: 'Your audience size'
+          },
+          {
+            icon: `<svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>`,
+            bg: 'rgba(244,114,182,0.15)', color: '#f472b6',
+            label: 'You Follow', num: FG,
+            pct: FG > 0 ? Math.round((FG / Math.max(F, FG)) * 100) : 0, note: 'People you follow'
+          },
+          {
+            icon: `<svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="m17 11 2 2 4-4"/></svg>`,
+            bg: 'rgba(16,185,129,0.15)', color: '#10b981',
+            label: 'Mutual', num: MB,
+            pct: F > 0 ? Math.round((MB / F) * 100) : 0, note: 'Follow each other'
+          },
+          {
+            icon: `<svg class="icon" viewBox="0 0 24 24"><path d="M9 9.5 15 15"/><path d="M15 9.5 9 15"/><circle cx="12" cy="12" r="10"/></svg>`,
+            bg: 'rgba(239,68,68,0.13)', color: '#ef4444',
+            label: 'Not Following Back', num: NF,
+            pct: FG > 0 ? Math.round((NF / FG) * 100) : 0, note: 'You follow; they don’t'
+          },
+          {
+            icon: `<svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>`,
+            bg: 'rgba(245,158,11,0.13)', color: '#f59e0b',
+            label: 'You don’t Follow Back', num: YD,
+            pct: F > 0 ? Math.round((YD / F) * 100) : 0, note: 'They follow; you don’t'
+          },
+          {
+            icon: `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+            bg: 'rgba(99,102,241,0.13)', color: '#6366f1',
+            label: 'Pending Requests', num: PD,
+            pct: FG > 0 ? Math.round((PD / FG) * 100) : 0, note: 'Awaiting approval'
+          },
+        ];
+
+        row.innerHTML = '';
+        items.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'funnel-card';
+          card.innerHTML = `
+        <div class="funnel-icon" style="background:${item.bg};color:${item.color}">${item.icon}</div>
+        <div class="funnel-info">
+          <div class="funnel-label">${item.label}</div>
+          <div class="funnel-num">${item.num.toLocaleString()}</div>
+          <div class="funnel-pct">${item.note}</div>
+          <div class="funnel-bar-track">
+            <div class="funnel-bar-fill" style="width:0%;background:${item.color}" data-target="${item.pct}"></div>
+          </div>
+        </div>
+      `;
+          row.appendChild(card);
+        });
+
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          row.querySelectorAll('.funnel-bar-fill').forEach(el => {
+            el.style.width = el.dataset.target + '%';
+          });
+        }));
+      }
+
+      /* --- Insight Cards --- */
+      function renderInsights () {
+        const row = document.getElementById('insightsRow');
+        if (!row) return;
+
+        const F = state.followers.size;
+        const FG = state.following.size;
+        const MB = state.mutualFollowers.length;
+        const NF = state.notFollowingBack.length;
+
+        // Oldest follower
+        const allFollowers = Array.from(state.followers.values()).filter(u => u.timestamp > 0);
+        allFollowers.sort((a, b) => a.timestamp - b.timestamp);
+        const oldestFollower = allFollowers[ 0 ];
+        const newestFollower = allFollowers[ allFollowers.length - 1 ];
+
+        // Most active month
+        const monthMap = {};
+        allFollowers.forEach(u => {
+          const d = new Date(u.timestamp * 1000);
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+          monthMap[ key ] = (monthMap[ key ] || 0) + 1;
+        });
+        let bestMonth = null, bestCount = 0;
+        Object.entries(monthMap).forEach(([ k, v ]) => { if (v > bestCount) { bestCount = v; bestMonth = k; } });
+        let bestMonthLabel = '—';
+        if (bestMonth) {
+          const [ yr, mo ] = bestMonth.split('-');
+          bestMonthLabel = new Date(+yr, +mo - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+        }
+
+        // Engagement score (simple index)
+        const engScore = F > 0 ? Math.min(100, Math.round(((MB / F) * 50) + ((FG > 0 ? MB / FG : 0) * 50))) : 0;
+
+        // Ratio description
+        const ratio = FG > 0 ? F / FG : 0;
+        let ratioDesc = 'Balanced';
+        if (ratio > 2) ratioDesc = '🚀 Influence';
+        else if (ratio > 1.2) ratioDesc = '📈 Growing';
+        else if (ratio < 0.5) ratioDesc = '📉 Following Heavy';
+        else ratioDesc = '⚖️ Balanced';
+
+        const insights = [
+          {
+            emoji: '🕰️',
+            title: 'Oldest Follower',
+            value: oldestFollower ? `@${oldestFollower.username}` : '—',
+            note: oldestFollower ? `Following since ${fmtDate(oldestFollower.timestamp)}` : 'No timestamp data'
+          },
+          {
+            emoji: '🆕',
+            title: 'Newest Follower',
+            value: newestFollower ? `@${newestFollower.username}` : '—',
+            note: newestFollower ? `Followed on ${fmtDate(newestFollower.timestamp)}` : 'No timestamp data'
+          },
+          {
+            emoji: '📅',
+            title: 'Best Month',
+            value: bestMonthLabel,
+            note: bestCount > 0 ? `${bestCount} new followers gained` : 'No data'
+          },
+          {
+            emoji: '🎯',
+            title: 'Engagement Score',
+            value: engScore + ' / 100',
+            note: engScore >= 75 ? 'Excellent mutual engagement!' : engScore >= 50 ? 'Good balance' : 'Room to improve'
+          },
+          {
+            emoji: '📊',
+            title: 'Follower Ratio',
+            value: FG > 0 ? (F / FG).toFixed(2) + '×' : '∞',
+            note: ratioDesc
+          },
+          {
+            emoji: '👻',
+            title: 'Ghost Followers',
+            value: (F - MB).toLocaleString(),
+            note: `Follow you but you don’t follow back`
+          },
+        ];
+
+        row.innerHTML = '';
+        insights.forEach(ins => {
+          const card = document.createElement('div');
+          card.className = 'insight-card';
+          card.innerHTML = `
+        <div class="insight-emoji">${ins.emoji}</div>
+        <div class="insight-title">${ins.title}</div>
+        <div class="insight-value">${escapeHtml(String(ins.value))}</div>
+        <div class="insight-note">${escapeHtml(String(ins.note))}</div>
+      `;
+          row.appendChild(card);
+        });
+      }
+
+      /* ===============================================================
+         SHARE INSIGHTS — Canvas Image Generator
+      =============================================================== */
+      (function () {
+        const shareModal = document.getElementById('shareModal');
+        const shareWrap = document.getElementById('shareCanvasWrap');
+        const shareBtn = document.getElementById('shareInsightsBtn');
+        const shareClose = document.getElementById('shareClose');
+        const downloadBtn = document.getElementById('shareDownloadBtn');
+        const copyBtn = document.getElementById('shareCopyBtn');
+
+        let _canvas = null;
+
+        function openShareModal () {
+          _canvas = buildCanvas();
+          shareWrap.innerHTML = '';
+          shareWrap.appendChild(_canvas);
+          shareModal.classList.add('show');
+        }
+
+        if (shareBtn) shareBtn.addEventListener('click', openShareModal);
+        if (shareClose) shareClose.addEventListener('click', () => shareModal.classList.remove('show'));
+        shareModal.addEventListener('click', e => { if (e.target === shareModal) shareModal.classList.remove('show'); });
+
+        if (downloadBtn) downloadBtn.addEventListener('click', () => {
+          if (!_canvas) return;
+          const a = document.createElement('a');
+          a.download = 'instagram-insights.png';
+          a.href = _canvas.toDataURL('image/png');
+          a.click();
+          toast('Image downloaded!');
+        });
+
+        if (copyBtn) copyBtn.addEventListener('click', async () => {
+          if (!_canvas) return;
+          try {
+            _canvas.toBlob(async blob => {
+              try {
+                await navigator.clipboard.write([ new ClipboardItem({ 'image/png': blob }) ]);
+                toast('Image copied to clipboard!');
+              } catch (e) { toast('Copy not supported in this browser — use Download instead'); }
+            }, 'image/png');
+          } catch (e) { toast('Could not copy image'); }
+        });
+
+        function buildCanvas () {
+          const DPR = Math.min(window.devicePixelRatio || 1, 2);
+          const W = 800, H = 480;
+          const c = document.createElement('canvas');
+          c.width = W * DPR;
+          c.height = H * DPR;
+          c.style.width = W + 'px';
+          c.style.height = H + 'px';
+          const ctx = c.getContext('2d');
+          ctx.scale(DPR, DPR);
+
+          const isDark = document.body.getAttribute('data-theme') === 'dark';
+
+          /* ── Helpers ── */
+          function rr (x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+            ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+            ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y + h - r, r);
+            ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+            ctx.closePath();
+          }
+          function fillRR (x, y, w, h, r, fill) { rr(x, y, w, h, r); ctx.fillStyle = fill; ctx.fill(); }
+
+          /* ── Background ── */
+          const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+          bgGrad.addColorStop(0, '#0f0c1e');
+          bgGrad.addColorStop(0.5, '#180d2e');
+          bgGrad.addColorStop(1, '#0d1020');
+          fillRR(0, 0, W, H, 0, bgGrad);
+
+          /* ── Subtle grid dots ── */
+          ctx.fillStyle = 'rgba(255,255,255,0.03)';
+          for (let gx = 0; gx < W; gx += 28) for (let gy = 0; gy < H; gy += 28) {
+            ctx.beginPath(); ctx.arc(gx, gy, 1, 0, Math.PI * 2); ctx.fill();
+          }
+
+          /* ── Top gradient bar ── */
+          const barGrad = ctx.createLinearGradient(0, 0, W, 0);
+          barGrad.addColorStop(0, '#7c3aed'); barGrad.addColorStop(1, '#db2777');
+          fillRR(0, 0, W, 5, 0, barGrad);
+
+          /* ── Brand header ── */
+          // Badge
+          const badgeGrad = ctx.createLinearGradient(24, 20, 56, 52);
+          badgeGrad.addColorStop(0, '#7c3aed'); badgeGrad.addColorStop(1, '#db2777');
+          fillRR(24, 20, 32, 32, 8, badgeGrad);
+          ctx.fillStyle = '#fff'; ctx.font = 'bold 16px system-ui,sans-serif';
+          ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+          ctx.fillText('◆', 40, 36);
+
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 15px system-ui,sans-serif';
+          ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+          ctx.fillText('Instagram Followers Analyzer', 64, 36);
+
+          // Date stamp
+          const now = new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+          ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.font = '12px system-ui,sans-serif';
+          ctx.textAlign = 'right'; ctx.fillText(now, W - 24, 36);
+
+          /* ── Stat data ── */
+          const F = state.followers.size;
+          const FG = state.following.size;
+          const MB = state.mutualFollowers.length;
+          const NF = state.notFollowingBack.length;
+          const YD = state.youDontFollowBack.length;
+          const followBackRate = FG > 0 ? Math.round((MB / FG) * 100) : 0;
+          const ghostRate = F > 0 ? Math.round(((F - MB) / F) * 100) : 0;
+
+          /* ── Section title helper ── */
+          function sectionTitle (label, x, y) {
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '700 10px system-ui,sans-serif';
+            ctx.textTransform = 'uppercase'; ctx.textAlign = 'left';
+            ctx.fillText(label.toUpperCase(), x, y);
+          }
+
+          /* ── Big stat card helper ── */
+          function bigStat (x, y, w, h, value, label, color) {
+            fillRR(x, y, w, h, 12, 'rgba(255,255,255,0.06)');
+            // left accent bar
+            const accentGrad = ctx.createLinearGradient(x, y, x, y + h);
+            accentGrad.addColorStop(0, color); accentGrad.addColorStop(1, color + '66');
+            fillRR(x, y, 4, h, 2, accentGrad);
+            // value
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 26px system-ui,sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(typeof value === 'number' ? value.toLocaleString() : value, x + w / 2, y + h / 2 - 8);
+            // label
+            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '11px system-ui,sans-serif';
+            ctx.fillText(label, x + w / 2, y + h / 2 + 14);
+          }
+
+          /* ── Row 1: 4 big stats ── */
+          const row1y = 70, row1h = 80, gap = 12, cardW = (W - 48 - gap * 3) / 4;
+          const statDefs = [
+            { v: F, l: 'Followers', c: '#a78bfa' },
+            { v: FG, l: 'Following', c: '#f472b6' },
+            { v: MB, l: 'Mutual', c: '#34d399' },
+            { v: NF, l: 'Not Following Back', c: '#f87171' },
+          ];
+          statDefs.forEach((s, i) => {
+            bigStat(24 + i * (cardW + gap), row1y, cardW, row1h, s.v, s.l, s.c);
+          });
+
+          /* ── Row 2: ratio pills ── */
+          const row2y = 168;
+          sectionTitle('Ratio Breakdown', 24, row2y);
+
+          const pills = [
+            { label: 'Follow-Back Rate', value: followBackRate + '%', color: '#a78bfa' },
+            { label: 'Ghost Followers', value: ghostRate + '%', color: '#f472b6' },
+            { label: 'Follower Ratio', value: FG > 0 ? (F / FG).toFixed(2) + '×' : '∞', color: '#34d399' },
+            { label: "You Don't Follow", value: YD.toLocaleString(), color: '#fbbf24' },
+          ];
+          const pillW = (W - 48 - gap * 3) / 4;
+          pills.forEach((p, i) => {
+            const px = 24 + i * (pillW + gap), py = row2y + 14;
+            fillRR(px, py, pillW, 54, 10, 'rgba(255,255,255,0.05)');
+            ctx.fillStyle = p.color; ctx.font = 'bold 18px system-ui,sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(p.value, px + pillW / 2, py + 22);
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '10px system-ui,sans-serif';
+            ctx.fillText(p.label, px + pillW / 2, py + 40);
+          });
+
+          /* ── Row 3: Donut + Bar sparkline ── */
+          const row3y = 258;
+          sectionTitle('Audience Split', 24, row3y);
+          sectionTitle('Monthly Activity (followers)', W / 2 + 12, row3y);
+
+          // Donut chart
+          const donutCx = 120, donutCy = row3y + 80, donutR = 55, donutInner = 34;
+          const donutTotal = F + FG || 1;
+          const donutSegs = [
+            { v: F, c: '#a78bfa' },
+            { v: FG, c: '#f472b6' },
+          ];
+          let dAngle = -Math.PI / 2;
+          donutSegs.forEach(seg => {
+            const sweep = (seg.v / donutTotal) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.moveTo(donutCx, donutCy);
+            ctx.arc(donutCx, donutCy, donutR, dAngle, dAngle + sweep);
+            ctx.closePath();
+            ctx.fillStyle = seg.c; ctx.fill();
+            dAngle += sweep;
+          });
+          // inner hole
+          ctx.beginPath(); ctx.arc(donutCx, donutCy, donutInner, 0, Math.PI * 2);
+          ctx.fillStyle = '#0f0c1e'; ctx.fill();
+          // center text
+          ctx.fillStyle = '#fff'; ctx.font = 'bold 13px system-ui,sans-serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText((F + FG).toLocaleString(), donutCx, donutCy - 6);
+          ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.font = '9px system-ui,sans-serif';
+          ctx.fillText('TOTAL', donutCx, donutCy + 8);
+
+          // Legend beside donut
+          const lgx = 190, lgy = row3y + 40;
+          [ [ '#a78bfa', 'Followers', F ], [ '#f472b6', 'Following', FG ], [ '#34d399', 'Mutual', MB ] ].forEach(([ c, l, v ], i) => {
+            fillRR(lgx, lgy + i * 26, 10, 10, 3, c);
+            ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '11px system-ui,sans-serif';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText(l, lgx + 16, lgy + i * 26 + 5);
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 11px system-ui,sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(v.toLocaleString(), lgx + 170, lgy + i * 26 + 5);
+          });
+
+          // Bar sparkline (right side)
+          const allEntries = Array.from(state.followers.values()).filter(u => u.timestamp > 0);
+          if (allEntries.length > 0) {
+            const monthMap = {};
+            allEntries.forEach(u => {
+              const d = new Date(u.timestamp * 1000);
+              const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+              monthMap[ k ] = (monthMap[ k ] || 0) + 1;
+            });
+            const keys = Object.keys(monthMap).sort().slice(-12);
+            const vals = keys.map(k => monthMap[ k ]);
+            const maxV = Math.max(...vals) || 1;
+            const sparkX = W / 2 + 12, sparkY = row3y + 14;
+            const sparkW = W / 2 - 36, sparkH = 130;
+            const barW = Math.min(22, (sparkW - keys.length * 2) / keys.length);
+            const barGap = (sparkW - (barW * keys.length)) / (keys.length + 1);
+
+            keys.forEach((k, i) => {
+              const bh = Math.max(4, Math.round((vals[ i ] / maxV) * (sparkH - 24)));
+              const bx = sparkX + barGap + (i * (barW + barGap));
+              const by = sparkY + sparkH - bh - 14;
+              const bg2 = ctx.createLinearGradient(bx, by, bx, by + bh);
+              bg2.addColorStop(0, '#f472b6'); bg2.addColorStop(1, '#7c3aed');
+              fillRR(bx, by, barW, bh, 4, bg2);
+              // month label
+              const [ yr, mo ] = k.split('-');
+              const moLabel = new Date(+yr, +mo - 1, 1).toLocaleDateString(undefined, { month: 'short' });
+              ctx.save();
+              ctx.translate(bx + barW / 2, sparkY + sparkH - 10);
+              ctx.rotate(-0.6);
+              ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.font = '8px system-ui,sans-serif';
+              ctx.textAlign = 'right'; ctx.fillText(moLabel, 0, 0);
+              ctx.restore();
+            });
+          } else {
+            ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.font = '12px system-ui,sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('No timestamp data available', W * 3 / 4, row3y + 80);
+          }
+
+          /* ── Footer ── */
+          fillRR(0, H - 36, W, 36, 0, 'rgba(0,0,0,0.25)');
+          ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.font = '11px system-ui,sans-serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('🔒 Analyzed privately in your browser • No data uploaded', W / 2, H - 18);
+
+          return c;
+        }
+      })();
+
+    })();
+  </script>
 </body>
+
 </html>

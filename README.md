@@ -8,20 +8,24 @@ Everything runs locally in your browser. No backend, no servers, no data collect
 
 ## Features
 
-- Drag-and-drop upload of your Instagram data export ZIP
-- Dashboard with followers, following, non-mutual, unfollowed, pending, blocked, and restricted counts
-- Searchable, sortable, paginated tables for every list
-- Select profiles and open them in bulk, copy usernames/URLs, or export to CSV, JSON, or Excel
-- Light and dark theme
-- Built-in step-by-step guide (with screenshots) on how to request and download your Instagram data export
+- **Drag-and-drop upload** of your Instagram data export ZIP
+- **Dashboard** with followers, following, non-mutual, unfollowed, pending, blocked, and restricted counts
+- **Interactive data visualizations** — donut chart and bar chart breakdowns of your follow stats
+- **Shareable stats card** — generate and download a summary image to share your results
+- **Searchable, sortable, paginated tables** for every list
+- **Bulk actions** — select profiles and open them in bulk, copy usernames/URLs, or export to CSV, JSON, or Excel
+- **Responsive grid layout** — works great on desktop, tablet, and mobile
+- **Light and dark theme**
+- **Built-in step-by-step guide** (with screenshots) on how to request and download your Instagram data export
+- **PWA-ready** with an app icon for adding to your home screen
 
 ## Getting Started
 
 1. Open the [live demo](https://mahdialaaaldin.github.io/instagram-analyzer/) or open `index.html` locally in your browser.
-2. Follow the in-app guide to request your data export from Instagram (Settings → Accounts Center → Your information and permissions → Download your information), choosing JSON format and the "Followers and following" category.
+2. Follow the in-app guide to request your data export from Instagram (Settings → Accounts Center → Your information and permissions → Download your information), choosing **JSON** format and the **"Followers and following"** category.
 3. Once Instagram emails you the export, download the ZIP file.
 4. Drop the ZIP into the upload box.
-5. Explore your dashboard.
+5. Explore your dashboard and charts.
 
 ## Running Locally
 
