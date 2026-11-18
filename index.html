@@ -146,15 +146,7 @@
       background: none;
       border: 0;
       padding: 0;
-      font-size: 16px;
-      min-width: 0;
-      overflow: hidden
-    }
-
-    .brand>span:last-child {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap
+      font-size: 16px
     }
 
     .logo {
@@ -1048,21 +1040,11 @@
       margin-bottom: 6px
     }
 
-    .ltitle>div {
-      min-width: 0;
-      flex: 1
-    }
-
-    .ltitle>button {
-      flex-shrink: 0
-    }
-
     .ltitle h2 {
       margin: 0;
       font-size: 23px;
       letter-spacing: -.025em;
-      line-height: 1.2;
-      word-break: break-word
+      line-height: 1.2
     }
 
     .lbar {
@@ -1172,11 +1154,13 @@
 
     .rows {
       display: grid;
+      grid-template-columns: minmax(0, 1fr);
       gap: 8px;
       margin-top: 6px
     }
 
     .row {
+      min-width: 0;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -1656,7 +1640,8 @@
     .rcard .nm {
       color: var(--dim);
       margin-top: 2px;
-      min-height: 1.5em
+      min-height: 1.5em;
+      overflow-wrap: anywhere
     }
 
     .rcard .since {
